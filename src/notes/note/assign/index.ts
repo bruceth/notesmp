@@ -1,0 +1,1 @@
+export { CNoteAssign } from './CNoteAssign';

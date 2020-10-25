@@ -1,0 +1,166 @@
+
+-- Group是虚拟的群定义，folder of Group 才是某个人的实体，装小单的
+MAP GroupX (
+	KEY group ID Note,
+	unit ID Note,				-- 定义群属于某个机构
+);
+
+-- 包含了所有的Group成员
+MAP GroupFolder (
+	KEY group ID Note,			-- NoteType=group
+	KEY member ID [$User],
+	folder ID Note,				-- NoteType=groupFolder
+	role TINYINT DEFAULT 0, 	-- 0: 普通, 1: owner, 2: admin
+	state TINYINT DEFAULT 1,	-- 1:正常，0:删除
+	INDEX folder (folder) UNIQUE,
+);
+
+ACTION AddGroup (
+	caption CHAR(200),				-- 群名字
+	content TEXT,					-- 说明
+	ARR members (
+		member ID [$User],
+	),
+)
+RETURNS ret (
+	group ID,
+	folder ID,
+) {
+	VAR groupId ID, folderId ID, specFolderId ID, seconds INT;
+	SET seconds=TIMESTAMPDIFF(second, '2020-1-1', $date);
+	TUID Note INTO groupId SET type=EnumNoteType.Group, caption=caption, content=content, owner=$user;
+
+	-- 建立自己的Group Folder
+	TUID Note INTO folderId SET type=EnumNoteType.GroupFolder, caption=caption, content=content, owner=$user;
+	BOOK GroupFolder AT(groupId, $user) SET folder=folderId;
+	SET specFolderId=folder FROM SpecFolder WHERE owner=$user AND spec=EnumSpecFolder.notes;
+	BOOK FolderNote AT(specFolderId, folderId) SET seconds=seconds;
+	TUID [$User] ID ($user) SET poke=1;
+
+	-- 建立其它成员的Group Folder
+	FOREACH members {
+		var memberFolderId ID;
+		SET specFolderId=NULL;  --必须在循环开始时清空
+		SET specFolderId=folder FROM SpecFolder WHERE owner=member AND spec=EnumSpecFolder.notes;
+		TUID Note INTO memberFolderId SET type=EnumNoteType.GroupFolder, caption=caption, content=content, owner=member;
+		BOOK GroupFolder AT(groupId, member) SET folder=memberFolderId;
+		BOOK FolderNote AT(specFolderId, memberFolderId) SET seconds=seconds;
+		TUID [$User] ID (member) SET poke=1;
+	}
+	INTO ret SELECT groupId as [group], folderId as folder;
+};
+
+ACTION SetGroupProp(
+	groupId ID,
+	prop TINYINT,				-- 1: caption, 2: content
+	value TEXT,
+) {
+	IF exists(SELECT id FROM Note WHERE owner=$user AND id=groupId AND type=EnumNoteType.Group) {
+		IF prop=1 {
+			TUID Note ID groupId SET caption=value;
+		}
+		ELSEIF prop=2 {
+			TUID Note ID groupId SET content=value;
+		}
+	}
+};
+
+QUERY GetGroupFolderMemberCount(
+	folder ID Note,
+)
+RETURNS ret (
+	[group] ID,
+	count INT,
+	owner ID [$User],
+) {
+	VAR groupId ID, [count] INT, [owner] ID;
+	SET groupId=a.group, [owner]=b.owner FROM GroupFolder as a 
+		LEFT JOIN Note as b ON a.group=b.id
+		WHERE a.folder=folder;
+	SET [count]=count(*) FROM GroupFolder as a WHERE a.group=groupId and a.state=1;
+	INTO ret select groupId as [group], [count], [owner];
+};
+
+QUERY GetGroupMembers(
+	group ID NOTE,
+)
+RETURNS ret (
+	contact ID [$User],
+	assigned TEXT(TINY),
+	already TINYINT,
+	state TINYINT,
+) {
+	INTO ret SELECT a.member as contact, b.assigned,
+		a.state as already,
+		b.state
+		FROM GroupFolder as a 
+			LEFT JOIN MyContact as b ON a.member=b.contact and b.me=$user
+		WHERE a.group=[group]; -- AND b.state=EnumContactState.OK;
+};
+
+-- MyContact with already
+QUERY GetGroupContacts (
+	group ID NOTE,
+)
+RETURNS ret (
+	contact ID [$User],
+	assigned TEXT(TINY),
+	already TINYINT,
+	state TINYINT,
+) {
+	INTO ret SELECT b.contact, b.assigned,
+		CASE WHEN a.member IS NULL or a.state=0 THEN 0 ELSE 1 END as already,
+		b.state
+		FROM MyContact as b
+			LEFT JOIN GroupFolder as a ON a.member=b.contact and a.group=[group]
+		WHERE b.me=$user;
+};
+
+ACTION AddGroupMember (
+	group ID Note,
+	member ID [$User],
+) {
+	IF exists(SELECT id FROM Note WHERE owner=$user AND id=[group] AND type=EnumNoteType.Group) {
+		VAR folderId ID, specFolderId ID, caption CHAR(200), content TEXT, seconds INT;
+		SET folderId=a.folder FROM GroupFolder as a WHERE a.group=group AND a.member=member;
+		SET caption=a.caption, content=a.content FROM Note as a WHERE a.id=group;
+		IF folderId IS NULL {
+			SET specFolderId=folder FROM SpecFolder WHERE owner=member AND spec=EnumSpecFolder.notes;
+			SET seconds=TIMESTAMPDIFF(second, '2020-1-1', $date);
+			TUID Note INTO folderId SET type=EnumNoteType.GroupFolder, caption=caption, content=content, owner=member;
+			BOOK GroupFolder AT(group, member) SET folder=folderId;
+			BOOK FolderNote AT(specFolderId, folderId) SET seconds=seconds;
+			TUID [$User] ID (member) SET poke=1;
+		}
+		else {
+			TUID Note ID folderId SET caption=caption, content=content;
+			BOOK GroupFolder AT(group, member) SET state=1;
+		}
+	}
+};
+
+ACTION RemoveGroupMember (
+	group ID Note,
+	member ID [$User],
+) {
+	IF exists(SELECT id FROM Note WHERE owner=$user AND id=[group] AND type=EnumNoteType.Group) {
+		BOOK GroupFolder AT(group, member) SET state=0;
+	}
+};
+
+ACTION SetGroup (
+	group ID,
+	caption CHAR(200),
+	content TEXT,
+) {
+	IF exists(SELECT id FROM Note WHERE id=group and owner=$user) {
+		VAR seconds INT;
+		TUID Note ID group SET caption=caption, content=content;
+		SET seconds=TIMESTAMPDIFF(second, '2020-1-1', $date);
+		FOREACH (var folder ID OF SELECT a.folder FROM GroupFolder as a WHERE a.group=group) {
+			TUID Note ID folder SET caption=caption, content=content;
+			Proc NotifyNote(folder, seconds, 0);
+		}
+	}
+};
+

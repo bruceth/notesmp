@@ -1,0 +1,1 @@
+export { CNoteText } from './CNoteText';

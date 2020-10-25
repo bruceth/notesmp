@@ -1,0 +1,116 @@
+--TUID Folder (
+--	id,
+--	main caption CHAR(100),
+--	owner ID [$User],
+--	index owner_id (owner, id) UNIQUE,
+--);
+
+ENUM EnumSpecFolder (notes=1, good=2);
+
+MAP SpecFolder (
+	KEY owner ID [$User],
+	KEY spec TINYINT,
+	folder ID Note,
+);
+/* ON ADD {
+	// only for test of ON ADD action
+	var a INT, b int;
+	SET a = owner;
+	set b = spec;
+};*/
+
+QUERY GetNotes ver 1.02 (
+	folderId ID Note,				-- folderId < 0, 则是特定folder，如果没有，需要创建
+	withX TINYINT,					-- withX = 1, then x=1 的note也出来	
+)
+PAGE (
+	seconds INT DESC, 
+	owner ID,
+	note ID, 						--- Note,
+	type SMALLINT,
+	caption CHAR(200),
+	content TEXT,
+	x TINYINT,
+	assigned CHAR(100),
+	from ID,
+	fromAssigned CHAR(100),
+	state TINYINT,
+	flowContent TEXT,
+	groupFolder ID,
+	unread TINYINT,
+	[$create] TIMESTAMP,
+	[$update] TIMESTAMP,
+	toCount INT,
+	spawnCount INT,
+	commentCount INT,
+	commentUnread INT,
+) {
+	-- 第一次如果没有notes folder，则创建
+	IF folderId < 0 {
+		VAR specFolderId ID;
+		SET specFolderId = folder FROM SpecFolder WHERE owner=$user AND spec=-folderId;
+		IF specFolderId IS NULL {
+			TUID Note INTO specFolderId SET owner=$user, type=EnumNoteType.Folder;
+			BOOK SpecFolder AT($user, -folderId) SET folder=specFolderId;
+		}
+		SET folderId = specFolderId;
+	}
+	PAGE SELECT a.seconds, b.owner, a.note, b.type
+		, b.caption, b.content, b.x, c.assigned
+		, b.[from], e.assigned as fromAssigned
+		, d.state, d.flowContent, f.groupFolder, a.unread
+		, b.[$create], b.[$update]
+		, (SELECT Count(*) FROM NoteAccess as WHERE note=a.note AND access=1) as toCount
+		, (SELECT Count(*) FROM Note2Note WHERE note0=a.note AND type=EnumNoteMapType.Spawn) as spawnCount
+		, (SELECT Count(*) FROM Note2Note WHERE note0=a.note AND type=EnumNoteMapType.Comment) as commentCount
+		, a.commentUnread
+		FROM FolderNote as a
+			LEFT JOIN Note as b ON a.note=b.id
+			LEFT JOIN MyContact as c ON c.me=$user and b.owner=c.contact
+			LEFT JOIN NoteX as d ON a.note=d.note
+			LEFT JOIN MyContact as e ON e.me=$user and b.from=c.contact
+			LEFT JOIN NoteXGroup as f ON a.note=f.folder
+		WHERE a.folder=folderId and a.seconds<$pageStart and (b.x=0 OR withX>0)
+		ORDER BY a.seconds desc
+		LIMIT $pageSize;
+};
+
+QUERY GetNoteItemFromId (
+	note ID Note,
+)
+RETURNS ret (
+	seconds INT, 
+	owner ID,
+	note ID, 						--- Note,
+	type SMALLINT,
+	caption CHAR(200),
+	content TEXT,
+	assigned CHAR(100),
+	from ID,
+	fromAssigned CHAR(100),
+	state TINYINT,
+	flowContent TEXT,
+	groupFolder ID,
+	unread TINYINT,
+	[$create] TIMESTAMP,
+	[$update] TIMESTAMP,
+	toCount INT,
+	spawnCount INT,
+	commentCount INT,
+	commentUnread INT,
+) {
+	INTO ret SELECT 0 as seconds, b.owner, b.id as note, b.type
+		, b.caption, b.content, c.assigned
+		, b.[from], e.assigned as fromAssigned
+		, d.state, d.flowContent, 0 as groupFolder, 0 as unread
+		, b.[$create], b.[$update]
+		, 0 as toCount
+		, 0 as spawnCount
+		, 0 as commentCount
+		, 1 as commentUnread
+		FROM Note as b
+			LEFT JOIN MyContact as c ON c.me=$user and b.owner=c.contact
+			LEFT JOIN NoteX as d ON d.note=b.id
+			LEFT JOIN MyContact as e ON e.me=$user and b.from=c.contact
+		WHERE b.id=note;
+};

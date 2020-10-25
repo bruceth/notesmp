@@ -1,0 +1,317 @@
+ENUM EnumNoteType (
+	Text=0, Task=1, Comment=2, Folder=3, 
+	Group=4, GroupFolder=5, 
+	Unit=6, Assign=7, 
+	TextList=8, TextCheckable=9, UnitNote=10);
+
+-- type: 根据type，分配给特定的程序
+TUID Note (
+	id,
+	main type SMALLINT DEFAULT 0,		-- Note类, EnumNoteType
+	main caption CHAR(200),				-- 标题
+	main content TEXT,					-- 内容，格式根据type而定，json
+	main owner ID [$User],				-- 所有者
+	main x TINYINT DEFAULT 0,			-- 删除标志
+	main from ID [$User],				-- 派生来源人
+	stamp (create, update) main,
+);
+
+TAG NoteTag;
+
+MAP NoteTagMap (
+	KEY note ID Note,
+	KEY tag TAG NoteTag,
+	INDEX tag_note(tag, note) unique,
+);
+
+-- Note 操作中附件的信息
+MAP FLOW (
+	KEY note ID Note,
+	KEY flow SMALLINT DEFAULT 0,		-- 不断附加的id，跟操作相关
+	operator ID [$User],				-- 操作人
+	action TINYINT DEFAULT 0,			-- 由特别Note自定义
+	stamp TIMESTAMP DEFAULT ONUPDATE,
+	content TEXT,
+);
+
+-- ENUM EnumNoteFlag (None=0, Pin=1, Archive=2);
+
+-- end 是不是可以 archive
+-- state由特定程序定义，是json
+MAP NoteX (
+	KEY note ID Note,
+	state TINYINT DEFAULT 0,				-- 由特定程序自己定义的特定的当前状态
+	flowContent TEXT,
+	-- end TINYINT DEFAULT 0,				-- 1: end, can be archive
+);
+
+MAP FolderNote (
+	KEY folder ID Note,
+	KEY note ID Note,
+	--type SMALLINT DEFAULT 0,			-- Note类, EnumNoteType 多余，经常忘记写入
+	seconds INT,						-- seconds since 2020-1-1
+	unread TINYINT DEFAULT 0,			-- 1: read
+	commentUnread INT DEFAULT 0,		-- 未读的评论数
+	state TINYINT DEFAULT 0,			-- 对当前状态的描述，各type自行定义
+	index folder_seconds(folder, seconds),
+	index note_folder(note, folder) unique,
+);
+
+MAP NoteXGroup (
+	KEY folder ID Note,		-- NoteType=folder
+	groupFolder ID Note,	-- NoteType=groupFolder
+);
+
+ENUM EnumNoteMapType (Spawn=0, Born=1, Contain=2, Comment=3);
+
+MAP Note2Note (
+	KEY note0 ID Note,
+	KEY note1 ID Note,
+	type TINYINT DEFAULT 0,				-- NoteMapType
+);
+
+MAP NoteAccess (
+	KEY note ID Note,
+	KEY user ID [$User],
+	access TINYINT DEFAULT 0,				-- 1 表示允许
+);
+
+QUERY GetNote ver 1.0 (
+	folder ID,						-- folderId < 0, 则是特定folder
+	note ID,
+)
+RETURNS ret (
+	id ID,
+	type SMALLINT DEFAULT 0,		-- Note类, EnumNoteType
+	caption CHAR(200),				-- 标题
+	content TEXT,					-- 内容，格式根据type而定，json
+	owner ID,						-- 所有者
+	x TINYINT DEFAULT 0,			-- 删除标志
+	from ID [$User],				-- 派生来源人
+	[$create] TIMESTAMP,
+	[$update] TIMESTAMP,
+	state TINYINT,
+	flowContent TEXT,
+	groupFolder ID	
+)
+RETURNS flow (
+	flow SMALLINT,					-- 不断附加的id，跟操作相关
+	operator ID,					-- 操作人
+	action TINYINT,					-- 由特别Note自定义
+	stamp TIMESTAMP,
+	content TEXT,
+)
+RETURNS to (
+	user ID [$User],
+	access TINYINT,
+	assigned CHAR(100),
+)
+RETURNS comments (
+	id ID,
+	owner ID,						-- 所有者
+	content TEXT,
+	assigned CHAR(100),
+	[$create] TIMESTAMP,
+	[$update] TIMESTAMP,
+)
+RETURNS spawn (
+	seconds INT, 
+	owner ID [$User],
+	note ID, 						--- Note,
+	type SMALLINT,
+	from ID [$User],
+	caption CHAR(200),
+	content TEXT,
+	assigned CHAR(100),
+	state TINYINT,
+	unread TINYINT,
+	[$create] TIMESTAMP,
+	[$update] TIMESTAMP,
+)
+RETURNS contain (
+	seconds INT, 
+	owner ID [$User],
+	note ID, 						--- Note,
+	type SMALLINT,
+	from ID [$User],
+	caption CHAR(200),
+	content TEXT,
+	assigned CHAR(100),
+	state TINYINT,
+	unread TINYINT,
+	[$create] TIMESTAMP,
+	[$update] TIMESTAMP,
+) {
+	IF folder < 0 {
+		VAR fid ID;
+		SET folder = a.folder FROM SpecFolder as a WHERE a.owner=$user AND a.spec=-folder;
+	}
+	if folder <> note {
+		BOOK FolderNote AT (folder, note) SET unread=0, commentUnread=0;
+	}
+	INTO ret SELECT a.id, a.type, a.caption, a.content, a.owner, a.x, a.from, a.[$create], a.[$update], b.state, b.flowContent, c.groupFolder
+		FROM Note as a LEFT JOIN NoteX as b ON a.id=b.note
+		LEFT JOIN NoteXGroup as c ON a.id=c.folder
+		WHERE a.id=note;
+	INTO flow SELECT a.flow, a.operator, a.action, a.stamp, a.content
+		FROM Flow as a
+		WHERE a.note=note;
+	INTO [to] SELECT a.user, a.access, c.assigned
+		FROM NoteAccess as a LEFT JOIN MyContact as c ON c.me=$user and a.user=c.contact
+		WHERE a.note=note;
+	INTO comments SELECT a.note1 as id, b.owner
+		, b.content, c.assigned
+		, b.[$create], b.[$update]
+		FROM Note2Note as a
+			LEFT JOIN Note as b ON a.note1=b.id
+			LEFT JOIN MyContact as c ON c.me=$user and b.owner=c.contact
+		WHERE a.note0=note and a.type=EnumNoteMapType.Comment
+		ORDER BY a.note1 desc
+		LIMIT 10;
+	INTO spawn SELECT a.note1 as seconds, b.owner, a.note1 as note, b.type
+		, b.[from]
+		, b.caption, b.content, c.assigned, d.state, 0 as unread
+		, b.[$create], b.[$update]
+		FROM Note2Note as a
+			LEFT JOIN Note as b ON a.note1=b.id
+			LEFT JOIN MyContact as c ON c.me=$user and b.owner=c.contact
+			LEFT JOIN NoteX as d ON a.note1=d.note
+		WHERE a.note0=note and a.type=EnumNoteMapType.spawn
+		ORDER BY a.note1 desc
+		LIMIT 20;
+	INTO contain SELECT a.note1 as seconds, b.owner, a.note1 as note, b.type
+		, b.[from]
+		, b.caption, b.content, c.assigned, d.state, 0 as unread
+		, b.[$create], b.[$update]
+		FROM Note2Note as a
+			LEFT JOIN Note as b ON a.note1=b.id
+			LEFT JOIN MyContact as c ON c.me=$user and b.owner=c.contact
+			LEFT JOIN NoteX as d ON a.note1=d.note
+		WHERE a.note0=note and a.type=EnumNoteMapType.contain
+		ORDER BY a.note1 desc
+		LIMIT 20;
+};
+
+ACTION AddNote VER 1.04 (
+	groupFolder ID Note,
+	folder ID Note,
+	caption CHAR(200),
+	content TEXT,
+	type SMALLINT,
+)
+RETURNS ret (
+	note ID Note,
+) {
+	VAR noteId ID, folderId ID, seconds INT;
+	TUID Note INTO noteId SET type=type, caption=caption, content=content, owner=$user;
+	SET folderId=folder;
+	if folderId is NULL OR folderId <= 0 {
+		SET folderId=a.folder FROM SpecFolder as a WHERE a.owner=$user AND a.spec=EnumSpecFolder.notes;
+	}
+	if type=EnumNoteType.Folder AND groupFolder > 0 {
+		BOOK NoteXGroup AT (noteId) SET groupFolder=groupFolder;
+	}
+	SET seconds=TIMESTAMPDIFF(second, '2020-1-1', $date);
+	BOOK FolderNote AT (folderId, noteId) SET seconds=seconds;
+	Proc NotifyNote(folderId, seconds, 0);
+	INTO ret SELECT noteId as note;
+};
+
+ACTION AddComment (
+	note ID,				-- comment on the note
+	content TEXT,
+)
+RETURNS ret (
+	comment ID,
+) {
+	VAR commentId ID, seconds INT;
+
+	--看到即有评论权限
+	TUID Note INTO commentId SET type=EnumNoteType.Comment, content=content, owner=$user;
+	SET seconds=TIMESTAMPDIFF(second, '2020-1-1', $date);
+	Proc NotifyNote(note, seconds, 1);
+	BOOK Note2Note AT(note, commentId) SET type=EnumNoteMapType.Comment;
+
+	INTO ret SELECT commentId as comment;
+};
+
+ACTION SetNote (
+	note ID,
+	type SMALLINT,
+	caption CHAR(200),
+	content TEXT,
+) {
+	IF exists(SELECT id FROM Note WHERE id=note and owner=$user) {
+		VAR noteId ID, folderId ID, seconds INT;
+		TUID Note ID note SET caption=caption, content=content, type=type;
+		SET seconds=TIMESTAMPDIFF(second, '2020-1-1', $date);
+		Proc NotifyNote(note, seconds, 0);
+	}
+};
+
+ACTION SetNoteX (
+	note ID,
+	content TEXT,
+) {
+	IF exists(SELECT id FROM Note WHERE id=note) {
+		BOOK NoteX AT(note) SET flowContent=content;
+	}
+};
+
+ACTION SendNoteTo ver 1.0 (
+	groupFolder ID,
+	note ID,
+	tos TEXT,
+) {
+	IF exists(SELECT id FROM Note WHERE id=note and owner=$user) {
+		VAR seconds INT, groupId ID;
+		SET seconds=TIMESTAMPDIFF(second, '2020-1-1', $date);
+		TABLE tblTo(to ID);
+		TEXT tos sep=',' ln='|' INTO tblTo;
+		SET groupId=a.group FROM GroupFolder as a WHERE a.folder=groupFolder AND a.member=$user;
+
+		--BOOK NoteAccess AT (note, *) SET access=0; 这句实际把所有access清空了
+		FOREACH (var to ID OF SELECT to FROM tblTo) {
+			VAR folderId ID, rootFolderId ID;
+			SET rootFolderId = NULL;
+			SET rootFolderId = folder FROM SpecFolder WHERE owner=to AND spec=EnumSpecFolder.notes;
+			SET folderId = NULL;
+			IF NOT groupId IS NULL {
+				SET folderId = a.folder FROM GroupFolder as a WHERE a.group=groupId AND a.member=to;
+			}
+			IF folderId IS NULL {
+				BOOK FolderNote AT(rootFolderId, note) SET seconds=seconds, unread=1;
+			}
+			ELSE {
+				BOOK FolderNote AT(folderId, note) SET seconds=seconds, unread=1;
+				Proc NotifyNote(folderId, seconds, 0);
+				BOOK FolderNote AT(rootFolderId, folderId) SET seconds=seconds, unread=1;
+			} 
+
+			BOOK NoteAccess AT (note, to) SET access=1;
+			TUID [$User] ID (to) SET poke=1;
+		};
+	}
+};
+
+ACTION HideNote (
+	note ID,
+	x TINYINT,
+) {
+	IF exists(SELECT id FROM Note WHERE id=note and owner=$user) {
+		TUID Note ID note SET x=x;
+	}
+};
+
+ACTION GetNoteToAndSpawnCount ver 1.0 (
+	note ID,
+)
+RETURNS ret (
+	to INT,
+	spawn INT,
+) {
+	VAR toCount INT, spawnCount INT;
+	SET toCount = Count(*) FROM NoteAccess as a WHERE a.note=[note] AND a.access=1;
+	SET spawnCount = Count(*) FROM Note2Note WHERE note0=note AND type=EnumNoteMapType.Spawn;
+	INTO ret SELECT toCount as to, spawnCount as spawn;
+};

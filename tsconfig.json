@@ -19,6 +19,9 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react",
+    "strictNullChecks": false,
+    "experimentalDecorators": true,
+    "baseUrl": "src",
     "typeRoots": [
       "node_modules/miniprogram-api-typings",
       "node_modules/typings",

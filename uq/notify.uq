@@ -1,0 +1,65 @@
+PROC NotifyNote (
+	note ID [Note],
+	seconds INT,
+	commentUnread INT,
+) {
+	VAR noteId INT;
+	TABLE tblNote(KEY folderId ID);
+	TABLE tblDone(KEY folderId ID);
+	INTO tblNote SELECT note as folderId;
+	WHILE 1=1 {
+		SET noteId = NULL;
+		SET noteId = folderId FROM tblNote ORDER BY folderId DESC LIMIT 1;
+		IF noteId IS NULL { break; }
+		DELETE FROM tblNote WHERE folderId=noteId;
+		INTO tblDone SELECT noteID as folderId;
+
+		FOREACH (var shareFolderId ID, ownerId ID OF SELECT a.folder as shareFolderId, b.owner as ownerId 
+				FROM FolderNote as a LEFT JOIN Note as b ON a.folder=b.id WHERE a.note=noteId) {
+			IF ownerId=$user {
+				BOOK FolderNote AT(shareFolderId, noteId) SET seconds = seconds;
+			}
+			ELSE {
+				BOOK FolderNote AT(shareFolderId, noteId) 
+					SET seconds = seconds
+						, unread = CASE WHEN commentUnread>0 THEN 0 ELSE 1 END
+						, commentUnread += commentUnread;
+				TUID [$User] ID (ownerId) SET poke=1;
+			}
+			IF (SELECT folderId FROM tblNote WHERE folderId=shareFolderId) IS NULL 
+					AND (SELECT folderId FROM tblDone WHERE folderId=shareFolderId) IS NULL
+			{
+				INTO tblNote SELECT shareFolderId as folderId;
+			}
+		}
+	}
+};
+
+PROC NotifyUserNote(
+	userId ID [$User],
+	note ID [Note],
+	seconds INT,
+) {
+	VAR noteId INT, unreadFlag TINYINT;
+	TABLE tblNote(KEY folderId ID);
+	TABLE tblDone(KEY folderId ID);
+	INTO tblNote SELECT note as folderId;
+	SET unreadFlag = CASE WHEN userId=$user THEN 0 ELSE 1 END;
+	WHILE 1=1 {
+		SET noteId = folderId FROM tblNote ORDER BY folderId DESC LIMIT 1;
+		IF noteId IS NULL { break; }
+		DELETE FROM tblNote WHERE folderId=noteId;
+		INTO tblDone SELECT noteID as folderId;
+
+		FOREACH (var shareFolderId ID OF SELECT a.folder as shareFolderId 
+				FROM FolderNote as a LEFT JOIN Note as b ON a.folder=b.id WHERE a.note=noteId AND b.owner=userId) {
+			BOOK FolderNote AT(shareFolderId, noteId) SET seconds=seconds, unread=unreadFlag;
+			IF (SELECT folderId FROM tblNote WHERE folderId=shareFolderId) IS NULL 
+					AND (SELECT folderId FROM tblDone WHERE folderId=shareFolderId) IS NULL {
+				INTO tblNote SELECT shareFolderId as folderId;
+			}
+		}
+		SET noteId = NULL;
+	}
+	TUID [$User] ID (userId) SET poke=1;
+};

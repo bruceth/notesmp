@@ -1,0 +1,190 @@
+ENUM EnumContactState (OK=0, Asking=1, Asked=2, Blocking=3, Blocked=4, Removing=5, Removed=6);
+
+MAP MyContact (
+	KEY me ID [$User],
+	KEY contact ID [$User],
+	assigned CHAR(100),
+	state TINYINT,
+	stamp TIMESTAMP DEFAULT ONUPDATE,	
+	INDEX me_stamp(me, stamp),
+);
+
+ACTION AddContact ver 1.0 (
+	contact ID [$User]
+)
+RETURNS ret (
+	state TINYINT,
+) {
+	VAR state TINYINT, retState TINYINT, rootFolderId ID;
+	IF contact<>$user {
+		SET rootFolderId = folder FROM SpecFolder WHERE owner=contact AND spec=EnumSpecFolder.notes;
+		IF rootFolderId IS NULL {
+			TUID Note INTO rootFolderId SET owner=contact, type=EnumNoteType.Folder;
+			BOOK SpecFolder AT(contact, EnumSpecFolder.notes) SET folder=rootFolderId;
+		}
+		SET state = a.state FROM MyContact as a WHERE a.me=contact AND a.contact=$user;
+		SET retState=EnumContactState.OK;
+		IF state=EnumContactState.OK {
+		}
+		ELSEIF state=EnumContactState.Asking {
+			BOOK MyContact AT(contact, $user) SET state=EnumContactState.OK;
+		}
+		ELSE {
+			SET retState=EnumContactState.Asking;
+			IF state IS NULL OR (state<>EnumContactState.Blocking AND state<>EnumContactState.OK) {
+				BOOK MyContact AT(contact, $user) SET state=EnumContactState.Asked;
+			}
+		}
+		BOOK MyContact AT($user, contact) SET state=retState;
+	}
+	INTO ret SELECT retState as state;
+};
+
+ACTION SetContactAssinged (
+	contact ID [$User],
+	assigned CHAR(100),
+)
+RETURNS ret (
+	state TINYINT,
+) {
+	VAR retState TINYINT;
+	IF contact<>$user {
+		SET retState = a.state FROM MyContact as a WHERE a.me=$user AND a.contact=contact;
+		IF NOT retState IS NULL {
+			BOOK MyContact AT($user, contact) SET assigned=assigned;
+		}
+	}
+	INTO ret SELECT retState as state;
+};
+
+QUERY GetMyContacts(
+	groupFolder ID,
+)
+PAGE (
+	contact ID [$User] ASC,
+	assigned TEXT(TINY),
+	state TINYINT,
+) {
+	IF groupFolder IS NULL OR groupFolder <= 0 {
+		PAGE SELECT contact, assigned, state
+			FROM MyContact 
+			WHERE me=$user AND contact>$pageStart
+			ORDER BY contact ASC
+			LIMIT $pageSize;
+	}
+	ELSE {
+		VAR groupId ID;
+		SET groupId=a.group FROM GroupFolder as a WHERE a.folder=groupFolder;
+
+		-- GroupFolder里面包含自己
+		-- GroupFolder JOIN MyContact 自动去掉了自己
+		PAGE SELECT b.contact, b.assigned, b.state
+			FROM GroupFolder as a 
+				JOIN MyContact as b ON b.me=$user AND b.contact=a.member
+			WHERE a.group=groupId AND b.contact>$pageStart
+			ORDER BY b.contact ASC
+			LIMIT $pageSize;
+	}
+};
+
+QUERY GetShareContacts (
+	groupFolder ID,
+	note ID Note,
+)
+PAGE (
+	contact ID [$User] ASC,
+	assigned TEXT(TINY),
+	already TINYINT,
+	state TINYINT,
+) {
+	IF groupFolder IS NULL OR groupFolder <= 0 {
+		PAGE SELECT b.contact, b.assigned, CASE WHEN c.access IS NULL OR c.access=0 THEN 0 ELSE 1 END as already, b.state
+			FROM MyContact as b
+				LEFT JOIN NoteAccess as c ON b.contact=c.user AND c.note=note
+			WHERE b.me=$user AND b.contact>$pageStart
+			ORDER BY b.contact ASC
+			LIMIT $pageSize;
+	}
+	ELSE {
+		VAR groupId ID;
+		SET groupId=a.group FROM GroupFolder as a WHERE a.folder=groupFolder;
+
+		-- GroupFolder里面包含自己
+		-- GroupFolder JOIN MyContact 自动去掉了自己
+		PAGE SELECT b.contact, b.assigned, CASE WHEN c.access IS NULL OR c.access=0 THEN 0 ELSE 1 END as already, b.state
+			FROM GroupFolder as a 
+				JOIN MyContact as b ON b.me=$user AND b.contact=a.member
+				LEFT JOIN NoteAccess as c ON b.contact=c.user AND c.note=note
+			WHERE a.group=groupId AND b.contact>$pageStart
+			ORDER BY b.contact ASC
+			LIMIT $pageSize;
+	}
+};
+
+QUERY GetSpawnContacts (
+	groupFolder ID,
+	note ID Note,				-- assign id
+)
+PAGE (
+	contact ID [$User] ASC,
+	assigned TEXT(TINY),
+	already TINYINT,
+	state TINYINT,
+) {
+	IF groupFolder IS NULL OR groupFolder <= 0 {
+		PAGE SELECT a.contact, a.assigned, CASE WHEN d.owner IS NULL THEN 0 ELSE 1 END as already, a.state
+			FROM MyContact as a
+				LEFT JOIN Note2Note as c ON c.note0=note AND c.type=EnumNoteMapType.Spawn
+				LEFT JOIN Note as d ON c.note1=d.id
+			WHERE a.me=$user AND a.contact>$pageStart
+			ORDER BY a.contact ASC
+			LIMIT $pageSize;
+	}
+	ELSE {
+		VAR groupId ID;
+		SET groupId=a.group FROM GroupFolder as a WHERE a.folder=groupFolder;
+
+		-- GroupFolder里面包含自己
+		-- GroupFolder JOIN MyContact 自动去掉了自己
+		PAGE SELECT b.contact, b.assigned, CASE WHEN d.owner IS NULL THEN 0 ELSE 1 END as already, b.state
+			FROM GroupFolder as a 
+				JOIN MyContact as b ON b.me=$user AND b.contact=a.member
+				LEFT JOIN Note2Note as c ON c.note0=note AND c.type=EnumNoteMapType.Spawn
+				LEFT JOIN Note as d ON c.note1=d.id
+			WHERE a.group=groupId AND b.contact>$pageStart
+			ORDER BY b.contact ASC
+			LIMIT $pageSize;
+	}
+};
+
+QUERY GetAssignToContacts (
+	groupFolder ID,
+	note ID Note,
+)
+PAGE (
+	contact ID [$User] ASC,
+	assigned TEXT(TINY),
+	already TINYINT,
+	state TINYINT,
+) {
+	IF groupFolder IS NULL OR groupFolder <= 0 {
+		PAGE SELECT b.contact, b.assigned, 0 as already, b.state
+			FROM MyContact as b
+			WHERE b.me=$user AND b.contact>$pageStart
+			ORDER BY b.contact ASC
+			LIMIT $pageSize;
+	}
+	ELSE {
+		VAR groupId ID;
+		SET groupId=a.group FROM GroupFolder as a WHERE a.folder=groupFolder;
+
+		-- GroupFolder里面包含自己
+		-- GroupFolder JOIN MyContact 自动去掉了自己
+		PAGE SELECT b.contact, b.assigned, 0 as already, b.state
+			FROM GroupFolder as a 
+				JOIN MyContact as b ON b.me=$user AND b.contact=a.member
+			WHERE a.group=groupId AND b.contact>$pageStart
+			ORDER BY b.contact ASC
+			LIMIT $pageSize;
+	}
+};

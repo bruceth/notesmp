@@ -1,0 +1,13 @@
+ENUM EnumSystemRole (owner=1, admin=2, unitAdmin=4);
+
+MAP SystemRole (
+	KEY user ID [$User],
+	role TINYINT,				-- bitwise Role
+);
+
+QUERY GetSystemRole()
+RETURNS ret (
+	role INT
+) {
+	INTO ret SELECT role FROM SystemRole WHERE user=$user;
+};

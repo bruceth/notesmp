@@ -1,0 +1,1 @@
+export { CFolderShare } from './CFolderShare';
