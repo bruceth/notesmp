@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { View } from "tonva";
+import { View } from "../../../../tonva";
 import { CTaskContent } from './CTaskContent';
 import { TaskCheckItem } from '../model';
 

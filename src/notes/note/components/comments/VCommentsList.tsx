@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Page, UserView, EasyTime, User } from "tonva";
+import { View, Page, UserView, EasyTime, User } from "../../../../tonva";
 import { CComments } from "./CComments";
-import { CommentItem } from 'notes/model';
+import { CommentItem } from '../../../../notes/model';
 
 export class VCommentsList extends View<CComments> {
 	render() {

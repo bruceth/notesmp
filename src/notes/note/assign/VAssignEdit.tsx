@@ -1,10 +1,10 @@
 import React from 'react';
-import { FA } from "tonva";
+import { FA } from "../../../tonva";
 import { CNoteAssign } from "./CNoteAssign";
-import { VNoteBaseEdit } from 'notes/noteBase';
-import { none } from 'tool';
-import { taskTimeToString } from 'notes/model';
-import { CInputHours } from 'notes/components';
+import { VNoteBaseEdit } from '../../../notes/noteBase';
+import { none } from '../../../tool';
+import { taskTimeToString } from '../../../notes/model';
+import { CInputHours } from '../../../notes/components';
 
 interface TaskParam {
 	label: string;

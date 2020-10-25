@@ -1,8 +1,8 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { User, Image, UserView, FA } from "tonva";
+import { User, Image, UserView, FA } from "../../tonva";
 import { VNoteBase, CNoteBase } from '.';
-import { none } from 'tool';
+import { none } from '../../tool';
 
 export interface TabRelative {
 	name: string;

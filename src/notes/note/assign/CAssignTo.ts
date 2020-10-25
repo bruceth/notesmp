@@ -1,9 +1,9 @@
-import { CTo } from "notes/components";
-import { VTo } from "notes/components/to/VTo"
+import { CTo } from "../../../notes/components";
+import { VTo } from "../../../notes/components/to/VTo"
 import { VAssignParams } from "./VAssignParams";
 import { CNoteAssign } from "./CNoteAssign";
-import { Query } from "tonva";
-import { Contact } from "model";
+import { Query } from "../../../tonva";
+import { Contact } from "../../../model";
 
 export class CAssignTo extends CTo {
 	cNoteAssign: CNoteAssign;

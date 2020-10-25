@@ -2,7 +2,7 @@ import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import React from 'react';
 import { VPage, userApi, User, Image, Page, List, UserView, 
-	Edit, ItemSchema, StringSchema, IntSchema, UiSchema, UiTextItem, UiNumberItem, BoolSchema, UiCheckItem } from "tonva";
+	Edit, ItemSchema, StringSchema, IntSchema, UiSchema, UiTextItem, UiNumberItem, BoolSchema, UiCheckItem } from "../tonva";
 import { CMe, RootUnitItem } from "./CMe";
 
 export class VAdmin extends VPage<CMe> {

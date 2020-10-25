@@ -1,7 +1,7 @@
 import { CContainer } from "../CContainer";
 import { VSpaceDir } from "./VSpaceDir";
 import { renderIcon } from "../../noteBase";
-import { compareID, EnumNoteType, NoteItem } from "notes/model";
+import { compareID, EnumNoteType, NoteItem } from "../../../notes/model";
 import { observable } from "mobx";
 import { Contact } from "model";
 import { VSpaceMembers } from "./VSpaceMembers";

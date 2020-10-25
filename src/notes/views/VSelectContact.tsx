@@ -2,8 +2,8 @@ import React from 'react';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { VBasePage } from './VBasePage';
-import { List, FA } from 'tonva';
-import { Contact } from 'model';
+import { List, FA } from '../../tonva';
+import { Contact } from '../../model';
 import { CNotes } from '../CNotes';
 
 export interface SelectContactOptions {

@@ -1,4 +1,4 @@
-import { CSub, CBase, CAppBase, IConstructor } from 'tonva';
+import { CSub, CBase, CAppBase, IConstructor } from '../tonva';
 import { UQs } from './uqs';
 import { CApp } from './CApp';
 

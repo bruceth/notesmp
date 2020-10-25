@@ -1,7 +1,7 @@
-import { CUqBase } from "tapp";
-import { initNoteItemObj, NoteItem } from "notes/model";
+import { CUqBase } from "../tapp";
+import { initNoteItemObj, NoteItem } from "../notes/model";
 import { VBook } from "./VBook";
-import { QueryPager } from "tonva";
+import { QueryPager } from "../tonva";
 import { VFlow } from "./VFlow";
 
 export interface ProjectSum {

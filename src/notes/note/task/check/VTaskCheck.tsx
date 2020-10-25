@@ -1,6 +1,6 @@
 import React from 'react';
 import { VTaskView } from '../VTaskView';
-import { Page, FA } from 'tonva';
+import { Page, FA } from '../../../../tonva';
 import { VEditTextItemInput, EditTextItemProps } from '../VEditTextItem';
 import { CTaskCheck } from './CTaskCheck';
 import { TaskCheckItem } from '../model';

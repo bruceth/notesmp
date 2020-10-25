@@ -1,9 +1,9 @@
 import React from 'react';
-import { DropdownAction, FA } from 'tonva';
+import { DropdownAction, FA } from '../../../tonva';
 import { VFolder } from "../views/VFolder";
 import { CSpace } from './CSpace';
 import { VNotesDropDown } from '../../views';
-import { CNotes } from 'notes/CNotes';
+import { CNotes } from '../../../notes/CNotes';
 import { observer } from 'mobx-react';
 
 export class VSpaceView extends VFolder<CSpace> {

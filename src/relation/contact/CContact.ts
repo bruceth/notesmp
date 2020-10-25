@@ -1,4 +1,4 @@
-import { CUqSub } from "tapp"
+import { CUqSub } from "../../tapp"
 import { observable } from "mobx";
 import { Contact } from "model";
 import { CRelation } from "../CRelation";

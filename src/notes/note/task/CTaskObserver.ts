@@ -1,4 +1,4 @@
-import { initNoteItemObj } from "notes/model";
+import { initNoteItemObj } from "../../../notes/model";
 import { CNoteTask } from "./CNoteTask";
 import { TaskStateResult, getTaskItemState } from "./TaskState";
 import { VTaskObserver, VTaskObserverDir } from "./VTaskObserver";

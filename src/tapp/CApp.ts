@@ -1,9 +1,9 @@
 import { CUqApp } from "./CBase";
 import { VMain } from "./main";
-import { CHome } from "home";
-import { CRelation } from "relation";
-import { CMe } from "me";
-import { CDiscover } from "discover";
+import { CHome } from "../home";
+import { CRelation } from "../relation";
+import { CMe } from "../me";
+import { CDiscover } from "../discover";
 import { computed } from "mobx";
 import { Contact } from "model";
 import { VTestMe } from "./VTestMe";

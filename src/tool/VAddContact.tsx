@@ -1,5 +1,5 @@
 import React from "react";
-import { VPage, SearchBox, userApi, Image, FA, Muted, Controller } from "tonva";
+import { VPage, SearchBox, userApi, Image, FA, Muted, Controller } from "../tonva";
 import { observable } from "mobx";
 import { observer } from "mobx-react";
 

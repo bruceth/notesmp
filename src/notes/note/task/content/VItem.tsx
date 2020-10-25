@@ -1,5 +1,5 @@
 import React from 'react';
-import { FA } from 'tonva';
+import { FA } from '../../../../tonva';
 import { TaskCheckItem } from '../model';
 import { VBase } from "./VBase";
 

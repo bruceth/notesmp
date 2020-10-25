@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { FA } from 'tonva';
+import { FA } from '../../../tonva';
 import { CContainer } from '../CContainer';
 import { VNoteBase } from '../../noteBase';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { VPage, User, Image, UserView, CBase } from "tonva";
+import { VPage, User, Image, UserView, CBase } from "../../tonva";
 import { Contact } from 'model';
 
 export abstract class VBasePage<T extends CBase> extends VPage<T> {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { FA, List } from 'tonva';
+import { FA, List } from '../../../tonva';
 import { VNoteBase } from '../../noteBase';
 import { CUnitNote, EnumUnitRole, UnitItem } from './CUnitNote';
 

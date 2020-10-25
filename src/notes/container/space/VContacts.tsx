@@ -1,7 +1,7 @@
 import { Contact } from 'model';
-import { VBasePage } from 'notes/views/VBasePage';
+import { VBasePage } from '../../../notes/views/VBasePage';
 import React from 'react';
-import { List } from 'tonva';
+import { List } from '../../../tonva';
 import { CSpace } from './CSpace';
 
 export class VContacts extends VBasePage<CSpace> {

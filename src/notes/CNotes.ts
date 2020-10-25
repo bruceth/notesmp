@@ -1,4 +1,4 @@
-import { CUqBase } from "tapp";
+import { CUqBase } from "../tapp";
 import { VSelectContact, SelectContactOptions } from "./views";
 import { EnumNoteType, initNoteItemObj, NoteItem } from "./model";
 import { CNoteBase } from "./noteBase";

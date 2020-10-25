@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { DropdownActions, DropdownAction } from 'tonva';
+import { DropdownActions, DropdownAction } from '../../../tonva';
 import { VNoteBaseEdit } from '../../noteBase';
 import { CNoteText } from "./CNoteText";
 import { VTextHeader } from './VTextHeader';

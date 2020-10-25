@@ -1,10 +1,10 @@
 import React from 'react';
-import { VBasePage } from "notes/views/VBasePage";
+import { VBasePage } from "../../../../notes/views/VBasePage";
 import { BookReport } from "./CUnitAdmin";
 import { CRootAdmin } from "./CUnitAdmin";
 import { FA, Form, ItemSchema, List, Page, 
 	ButtonSchema, UiButton, 
-	StringSchema, CStringEdit, UiTextItem, UiSchema, Context } from 'tonva';
+	StringSchema, CStringEdit, UiTextItem, UiSchema, Context } from '../../../../tonva';
 
 export class VReportsAdmin extends VBasePage<CRootAdmin> {
 	private projectFileds: ItemSchema[] = [

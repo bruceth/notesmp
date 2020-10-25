@@ -1,5 +1,5 @@
 import React from 'react';
-import { FA } from "tonva";
+import { FA } from "../../../tonva";
 import { CNote } from "../CNote";
 import { VRelativesBase, TabRelative } from '../../noteBase';
 

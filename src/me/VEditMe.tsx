@@ -3,7 +3,7 @@ import { observable } from 'mobx';
 import {
     userApi, ItemSchema, StringSchema, ImageSchema, UiTextItem, UiImageItem, nav, Page,
     Edit, UiSchema, VPage
-} from 'tonva';
+} from '../tonva';
 import { CMe } from './CMe';
 
 export class VEditMe extends VPage<CMe>{

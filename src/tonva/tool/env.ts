@@ -2,6 +2,8 @@ import { LocalMap } from './localDb';
 
 const testingTags:string[] = ['/test', '/test/', '-test', '-test/'];
 function isTesting():boolean {
+    if ("undefined" != typeof wx)
+        return false;
     let {pathname} = document.location;
     let pn = pathname.toLowerCase();
     for (let item of testingTags) {

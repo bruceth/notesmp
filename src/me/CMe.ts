@@ -1,5 +1,5 @@
-import { CUqBase } from "tapp";
-import { QueryPager, User } from "tonva";
+import { CUqBase } from "../tapp";
+import { QueryPager, User } from "../tonva";
 import { VAdmin } from "./VAdmin";
 import { VEditMe } from "./VEditMe";
 import { VMe } from "./VMe";

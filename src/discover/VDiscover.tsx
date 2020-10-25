@@ -1,6 +1,6 @@
 import React from 'react';
 import { CDiscover } from './CDiscover';
-import { VPage, LMR, FA } from 'tonva';
+import { VPage, LMR, FA } from '../tonva';
 
 interface Item {
 	icon: string;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
-import { List, FA } from 'tonva';
+import { List, FA } from '../../../tonva';
 import { Contact } from '../../../model';
 import { VBasePage } from '../../views/VBasePage';
 //import { VActions } from './VActions';

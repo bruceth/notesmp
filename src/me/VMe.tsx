@@ -1,8 +1,8 @@
 import React from 'react';
 import { CMe } from './CMe';
-import { Image, VPage, nav, IconText, PropGrid, LMR, FA, Prop } from 'tonva';
+import { Image, VPage, nav, IconText, PropGrid, LMR, FA, Prop } from '../tonva';
 import { observer } from 'mobx-react';
-import { appConfig } from 'tapp';
+import { appConfig } from '../tapp';
 
 export class VMe extends VPage<CMe> {
 	header() {return this.t('me')}

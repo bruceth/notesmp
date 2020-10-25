@@ -1,6 +1,6 @@
-import { VBasePage } from 'notes/views/VBasePage';
+import { VBasePage } from '../../../notes/views/VBasePage';
 import React from 'react';
-import { FA, List } from 'tonva';
+import { FA, List } from '../../../tonva';
 import { CSpace } from './CSpace';
 
 export class VSpaceMembers extends VBasePage<CSpace> {

@@ -1,5 +1,5 @@
 import { CContainer } from '../CContainer';
-import { VNoteBaseEdit } from 'notes/noteBase';
+import { VNoteBaseEdit } from '../../../notes/noteBase';
 
 export abstract class VContainerForm<T extends CContainer> extends VNoteBaseEdit<T> {
 	header() {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 import { observable, toJS } from 'mobx';
-import { FA } from 'tonva';
+import { FA } from '../../../tonva';
 
 interface Focusable<T> {
 	item: T;

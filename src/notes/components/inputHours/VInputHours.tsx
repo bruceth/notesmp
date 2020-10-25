@@ -1,7 +1,7 @@
 import React from 'react';
 import { CInputHours } from './CInputHours';
 import { VBasePage } from '../../views/VBasePage';
-import { checkHourMinutes, taskTimeToString } from 'notes/model';
+import { checkHourMinutes, taskTimeToString } from '../../../notes/model';
 
 export class VInputHours extends VBasePage<CInputHours> {
 	protected get back(): 'close' | 'back' | 'none' {return 'close'}

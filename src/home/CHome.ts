@@ -1,4 +1,4 @@
-import { CUqBase } from "tapp";
+import { CUqBase } from "../tapp";
 import { CNotes } from "../notes";
 import { VHome } from "./VHome";
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { CContact } from "./CContact";
-import { VPage } from "tonva";
+import { VPage } from "../../tonva";
 import { observable, computed } from "mobx";
 import { observer } from "mobx-react";
 

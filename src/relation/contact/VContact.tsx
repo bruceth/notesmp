@@ -1,6 +1,6 @@
 import React from "react";
 import { CContact } from "./CContact";
-import { VPage, UserView, Image, FA, Muted, User } from "tonva";
+import { VPage, UserView, Image, FA, Muted, User } from "../../tonva";
 import { observer } from "mobx-react";
 
 export class VContact extends VPage<CContact> {

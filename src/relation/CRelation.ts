@@ -1,4 +1,4 @@
-import { CUqBase } from "tapp";
+import { CUqBase } from "../tapp";
 import { VRelation } from "./VRelation";
 import { observable } from "mobx";
 import { Contact } from "model";

@@ -1,5 +1,5 @@
 import React from 'react';
-import { VPage } from "tonva";
+import { VPage } from "../../../../tonva";
 import { CComments } from "./CComments";
 
 export class VAddComment extends VPage<CComments> {

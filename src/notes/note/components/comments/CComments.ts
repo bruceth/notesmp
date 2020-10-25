@@ -1,7 +1,7 @@
-import { Controller } from "tonva";
+import { Controller } from "../../../../tonva";
 import { VCommentsList } from "./VCommentsList";
 import { VAddComment } from "./VAddComment";
-import { CNote } from "notes/note/CNote";
+import { CNote } from "../../../../notes/note/CNote";
 import { VWriteComment } from "./VWriteComment";
 
 export class CComments extends Controller {

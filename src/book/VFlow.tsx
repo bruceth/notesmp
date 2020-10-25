@@ -1,6 +1,6 @@
 import React from 'react';
 import { CBook, ProjectFlowItem, ProjectSum } from './CBook';
-import { VPage, List, EasyTime, FA } from 'tonva';
+import { VPage, List, EasyTime, FA } from '../tonva';
 
 export class VFlow extends VPage<CBook> {
 	private projectSum: ProjectSum;

@@ -1,12 +1,12 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { FA } from "tonva";
+import { FA } from "../../../tonva";
 import { TaskCheckItemBase } from './model';
 import { VNoteBaseView } from '../../noteBase';
 import { CNoteTask } from "./CNoteTask";
 import { VTaskRelatives } from './VTaskRelatives';
-import { none } from 'tool';
-import { taskTimeToString } from 'notes/model';
+import { none } from '../../../tool';
+import { taskTimeToString } from '../../../notes/model';
 
 export interface TaskParam {
 	label: string;

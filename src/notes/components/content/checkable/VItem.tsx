@@ -1,7 +1,7 @@
 import React from 'react';
 import { VBase } from "./VBase";
 import { ContentCheckItem } from "./CCheckable";
-import { FA } from 'tonva';
+import { FA } from '../../../../tonva';
 
 export class VItem extends VBase {
 	protected renderCheckItem(v:ContentCheckItem) {

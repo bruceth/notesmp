@@ -3,7 +3,7 @@ import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import classNames from 'classnames';
 import { IVPage } from './page';
-import { IObservableValue } from 'mobx';
+import { IObservableValue } from 'mobx/lib/internal';
 import '../../css/va-tab.css';
 import { ScrollView } from './scrollView';
 

@@ -1,6 +1,6 @@
-import { NoteItem } from 'notes/model';
+import { NoteItem } from '../../../notes/model';
 import React from 'react';
-import { DropdownAction, DropdownActions, List } from 'tonva';
+import { DropdownAction, DropdownActions, List } from '../../../tonva';
 import { VNoteBaseView } from '../../noteBase';
 import { getTaskItemState } from '../task/TaskState';
 import { CNoteAssign } from './CNoteAssign';

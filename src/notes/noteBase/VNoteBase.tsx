@@ -1,6 +1,6 @@
-import { VBasePage } from "notes/views/VBasePage";
+import { VBasePage } from "../../notes/views/VBasePage";
 import React from "react";
-import { User, Image, UserView, Page, EasyTime, FA } from "tonva";
+import { User, Image, UserView, Page, EasyTime, FA } from "../../tonva";
 import { CNoteBase } from "./CNoteBase";
 
 export function renderIcon(name:string, cn:string) {

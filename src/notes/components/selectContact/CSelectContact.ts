@@ -1,7 +1,7 @@
 import { observable } from "mobx";
 import { Contact } from "model";
 import { SelectContactOptions, VSelectContact } from "./VSelectContact";
-import { CUqBase } from "tapp";
+import { CUqBase } from "../../../tapp";
 
 export abstract class CSelectContact extends CUqBase {
 	@observable contacts: Contact[];

@@ -1,8 +1,8 @@
 import React from 'react';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
-import { List, FA } from 'tonva';
-import { Contact } from 'model';
+import { List, FA } from '../../../tonva';
+import { Contact } from '../../../model';
 import { CSelectContact } from './CSelectContact';
 import { VBasePage } from '../../views/VBasePage';
 

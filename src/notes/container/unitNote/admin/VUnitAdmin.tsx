@@ -1,11 +1,11 @@
 import React from 'react';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
-import { Edit, FA, Form, List, Schema, StringSchema, BoolSchema, UiSchema, UiTextItem, UiCheckItem, VPage, ItemSchema, Page } from 'tonva';
+import { Edit, FA, Form, List, Schema, StringSchema, BoolSchema, UiSchema, UiTextItem, UiCheckItem, VPage, ItemSchema, Page } from '../../../../tonva';
 import { EnumUnitRole, MemberItem, UnitItem } from "../CUnitNote";
 import { CAdminBase, CUnitAdmin, CRootAdmin } from './CUnitAdmin';
-import { VBasePage } from 'notes/views/VBasePage';
-import { VAddContact } from 'tool';
+import { VBasePage } from '../../../../notes/views/VBasePage';
+import { VAddContact } from '../../../../tool';
 
 export abstract class VAdminBase<C extends CAdminBase> extends VBasePage<C> {
 	content() {

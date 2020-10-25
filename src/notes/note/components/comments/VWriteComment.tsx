@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Page, FA } from "tonva";
+import { View, Page, FA } from "../../../../tonva";
 import { CComments } from "./CComments";
 
 export class VWriteComment extends View<CComments> {

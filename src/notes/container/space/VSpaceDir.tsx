@@ -1,8 +1,8 @@
 import React from 'react';
-import { FA } from 'tonva';
+import { FA } from '../../../tonva';
 import { CSpace } from './CSpace';
 import { observer } from 'mobx-react';
-import { VNoteBase, renderIcon } from 'notes/noteBase';
+import { VNoteBase, renderIcon } from '../../../notes/noteBase';
 
 export class VSpaceDir extends VNoteBase<CSpace> {
 	render() {

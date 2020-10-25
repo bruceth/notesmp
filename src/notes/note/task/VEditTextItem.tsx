@@ -1,5 +1,5 @@
 import React from "react";
-import { Controller, View, Page } from "tonva";
+import { Controller, View, Page } from "../../../tonva";
 import { observable } from "mobx";
 import { observer } from "mobx-react";
 

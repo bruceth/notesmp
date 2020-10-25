@@ -1,4 +1,4 @@
-import { Controller } from "tonva";
+import { Controller } from "../../../tonva";
 import { observable } from "mobx";
 
 export abstract class CContent extends Controller {

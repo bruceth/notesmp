@@ -1,8 +1,8 @@
-import { CInputHours } from 'notes/components';
-import { taskTimeToString } from 'notes/model';
+import { CInputHours } from '../../../../notes/components';
+import { taskTimeToString } from '../../../../notes/model';
 import React from 'react';
-import { FA, Image, User, UserView } from 'tonva';
-import { none } from 'tool';
+import { FA, Image, User, UserView } from '../../../../tonva';
+import { none } from '../../../../tool';
 import { VTaskView, TaskParam } from '../VTaskView';
 import { CTaskStart } from './CTaskStart';
 

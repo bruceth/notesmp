@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, DropdownActions, DropdownAction } from "tonva";
+import { View, DropdownActions, DropdownAction } from "../../tonva";
 import { CNotes } from "../CNotes";
 
 export abstract class VNotesDropDown extends View<CNotes> {

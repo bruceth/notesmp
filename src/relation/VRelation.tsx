@@ -1,8 +1,8 @@
 import React from 'react';
 import { CRelation } from './CRelation';
-import { VPage, FA, List, UserView, User, Image } from 'tonva';
+import { VPage, FA, List, UserView, User, Image } from '../tonva';
 import { VAdd } from './VAdd';
-import { Contact } from 'model';
+import { Contact } from '../model';
 
 export class VRelation extends VPage<CRelation> {
 	header() {return this.t('relation')}

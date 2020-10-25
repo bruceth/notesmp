@@ -36,3 +36,75 @@
     transform: rotate(360deg);
   }
 }
+
+ul.va-list>li.notes {
+	background-color: transparent;
+}
+li.notes>div {
+	background-color: #f6f6f6;
+}
+ul.note-content-list {
+	padding: 0;
+	margin:0;
+	list-style-type: disc;
+}
+ul.note-content-list>li {
+	padding: 0;
+	margin: 0;
+}
+.unread-dot {
+	position: relative;
+}
+.unread-dot>u {
+    position: absolute;
+    display: block;
+    right: -0.3rem;
+    top: -0.2rem;
+    height: 0.5rem;
+    width: 0.5rem;
+    background-color: red;
+    border-radius: 0.3rem;
+    color: white;
+    font-size: 0.75rem;
+	text-decoration: none;
+	text-align: center;
+}
+.unread-num {
+    position: absolute;
+    display: flex;
+    right: -1.5rem;
+    top: -0.2rem;
+	height: 1rem;
+	min-width: 1rem;
+    background-color: red;
+    border-radius: 0.5rem;
+    color: white;
+	align-items: center;
+	justify-content: center;
+	font-size:0.6rem;
+	padding: 0 0.2rem;
+}
+.fa-tonva-stack {
+	position: relative;
+	display: inline-flex;
+	vertical-align: middle;
+	width: 1.3rem;
+	height: 1.3rem;
+}
+.fa-stack-outer,
+.fa-stack-inner {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	text-align: center;
+}
+.fa-stack-inner {
+	line-height: inherit;
+	font-size: 0.3rem;
+	align-self: center;
+	top: 0.3rem;
+}
+
+.text-primary-dark {
+	color: #3f3fc0;
+}

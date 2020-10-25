@@ -1,15 +1,15 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import { VPage, FA, UserView, Image, User } from "tonva";
-import { none } from 'tool';
+import { VPage, FA, UserView, Image, User } from "../../../tonva";
+import { none } from '../../../tool';
 import { Contact } from '../../../model';
 import { SelectContactOptions } from '../../views';
 import { CNoteAssign } from "./CNoteAssign";
 import { CAssignTo } from './CAssignTo';
-import { CNotes } from 'notes/CNotes';
-import { CSelectContact } from 'notes/components/selectContact';
-import { taskTimeToString } from 'notes/model';
-import { CInputHours } from 'notes/components';
+import { CNotes } from '../../../notes/CNotes';
+import { CSelectContact } from '../../../notes/components/selectContact';
+import { taskTimeToString } from '../../../notes/model';
+import { CInputHours } from '../../../notes/components';
 
 export interface Row {
 	label: string;

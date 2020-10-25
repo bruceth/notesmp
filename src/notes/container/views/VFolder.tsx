@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, FA, User, Image, UserView } from 'tonva';
+import { List, FA, User, Image, UserView } from '../../../tonva';
 import { CContainer } from '../CContainer';
 import { CNoteBase, VNoteBase } from "../../noteBase";
 import { observer } from 'mobx-react';

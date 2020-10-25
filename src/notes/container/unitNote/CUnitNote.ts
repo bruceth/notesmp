@@ -1,6 +1,6 @@
 import { observable } from "mobx";
-import { EnumNoteType } from "notes/model";
-import { renderIcon } from "notes/noteBase";
+import { EnumNoteType } from "../../../notes/model";
+import { renderIcon } from "../../../notes/noteBase";
 import { CContainer } from "../CContainer";
 import { CRootAdmin, CUnitAdmin } from "./admin";
 import { VUnitNoteDir } from "./VUnitNoteDir";

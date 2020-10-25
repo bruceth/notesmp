@@ -1,7 +1,7 @@
 import React from 'react';
-import { VBasePage } from "notes/views/VBasePage";
+import { VBasePage } from "../../../../notes/views/VBasePage";
 import { BookProject, CAdminBase } from "./CUnitAdmin";
-import { FA, List, Page } from 'tonva';
+import { FA, List, Page } from '../../../../tonva';
 
 export class VUnitProjects <C extends CAdminBase> extends VBasePage<C> {
 	header() {return '显示科目'}

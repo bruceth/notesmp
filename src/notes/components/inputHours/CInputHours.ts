@@ -1,4 +1,4 @@
-import { CUqBase } from "tapp";
+import { CUqBase } from "../../../tapp";
 import { VInputHours } from "./VInputHours";
 
 export class CInputHours extends CUqBase {

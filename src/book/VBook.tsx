@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, FA } from "tonva";
+import { View, FA } from "../tonva";
 import { CBook, ProjectSum } from './CBook';
 
 export class VBook extends View<CBook> {

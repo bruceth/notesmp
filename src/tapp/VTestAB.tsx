@@ -1,6 +1,6 @@
 import React from 'react';
 import { CApp } from "./CApp";
-import { VPage } from "tonva";
+import { VPage } from "../tonva";
 import { VTestMe } from './VTestMe';
 
 export class VTestAB extends VPage<CApp> {
