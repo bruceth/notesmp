@@ -1,6 +1,7 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import 'font-awesome/css/font-awesome.min.css'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         >
           Learn React
         </a>
+        <i className="fa fa-camera-retro"></i>
       </header>
     </div>
   );
