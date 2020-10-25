@@ -18,7 +18,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react"
+    "jsx": "react",
+    "typeRoots": [
+      "node_modules/miniprogram-api-typings",
+      "node_modules/typings",
+      "node_modules/@types"
+    ]
   },
   "include": [
     "src"
