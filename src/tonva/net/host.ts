@@ -83,9 +83,9 @@ class Host {
 
     async start(testing:boolean) {
         this.testing = testing;
-        if (env.isDevelopment === true) {
-            await this.tryLocal();
-        }
+        // if (env.isDevelopment === true) {
+        //     await this.tryLocal();
+        // }
         let host = this.getCenterHost();
         this.url = centerUrlFromHost(host);
         this.ws = centerWsFromHost(host);
