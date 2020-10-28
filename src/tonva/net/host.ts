@@ -130,9 +130,11 @@ class Host {
 
     private getCenterHost():string {
         let {value, local} = hosts.centerhost;
-        let hash = document.location.hash;
-        if (hash.includes('sheet_debug') === true) {
-            return value;
+        if (document.location) {
+            let hash = document.location.hash;
+            if (hash && hash.includes('sheet_debug') === true) {
+                return value;
+            }
         }
         if (env.isDevelopment === true) {
             if (local === true) return value;
