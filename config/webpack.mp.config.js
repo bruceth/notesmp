@@ -5,6 +5,9 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
 const MpPlugin = require('mp-webpack-plugin')
 const isOptimize = false // 是否压缩业务代码，开发者工具可能无法完美支持业务代码使用到的 es 特性，建议自己做代码压缩
+const isMp = true;
+require('core-js/stable');
+require('regenerator-runtime/runtime');
 
 module.exports = {
   mode: 'production',
@@ -90,18 +93,58 @@ module.exports = {
           },
         ],
       },
+      // {
+      //   test: /\.[t|j]sx?$/,
+      //   loader: 'babel-loader',
+      //   exclude: /node_modules/,
+      //   options: {
+      //     plugins: [['transform-react-jsx'], ['class']],
+      //   },
+      // },
+      // {
+      //   test: /\.js$/,
+      //   exclude: /node_modules/,
+      //   loader: "babel-loader",
+      // },
       {
-        test: /\.[t|j]sx?$/,
-        loader: 'babel-loader',
-        exclude: /node_modules/,
-        options: {
-          plugins: [['transform-react-jsx'], ['class']],
-        },
-      },
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: "babel-loader",
+        test: /.(ts|js)x?$/,
+        use: [
+          'thread-loader',
+          {
+            loader: 'babel-loader?cacheDirectory',
+            options: {
+              configFile: false, // 避免babel加载babel.config.js
+              presets: [
+                '@babel/preset-typescript', // 支持typescript
+                '@babel/preset-react', // 支持react
+                // ['@babel/preset-env', {
+                //     modules: false,
+                //     useBuiltIns: 'usage',
+                //     corejs:3
+                //   }
+                // ]
+              ],
+              plugins: [
+                ["@babel/plugin-proposal-decorators", { "legacy": true }],
+                ["@babel/plugin-proposal-class-properties", { "loose": true }],
+                //"@babel/plugin-transform-runtime"
+              ],
+              compact:false,
+            }
+          },
+          {
+            loader: 'webpack-strip-block',
+            options: { // 依据标记移除代码块
+              start: isMp ? 'strip-block--h5-only:begin' : 'strip-block--mp-only:begin',
+              end: isMp ? 'strip-block--h5-only:end' : 'strip-block--mp-only:end',
+            },
+          }
+        ],
+        include: [
+          path.resolve(__dirname, '../src'),
+          path.resolve(__dirname, '../node_modules/@tencent'),
+        ],
+        sideEffects: !isMp, // 小程序开启tree shaking
       },
       {
         test: /\.(png|jpg|gif)$/,

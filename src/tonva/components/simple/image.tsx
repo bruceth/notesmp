@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { observable } from 'mobx';
-import { observer } from 'mobx-react';
+import _ from 'lodash';
 
 export interface ImageProps {
     src: string;
@@ -15,7 +14,7 @@ export function Image(props: ImageProps) {
         if (!src) {
             src = defaultImage;
         }
-        else if (src.startsWith(':') === true) {
+        else if (_.startsWith(src, ':') === true) {
             src = 'http://localhost:3015/res/' + src.substr(1);
         }
         return <img src={src} className={className} style={style} />;

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import { nav } from './nav';
+import _ from 'lodash';
 
 export interface ImageProps {
     src: string;
@@ -15,7 +16,7 @@ export function Image(props: ImageProps) {
 	let icon:string;
     if (src) {
 		if (src.indexOf('.') !== 0) {
-			if (src.startsWith(':') === true) {
+			if (_.startsWith(src, ':') === true) {
 				src = nav.resUrl + src.substr(1);
 			}
 			return <img src={src} className={className} alt="img"

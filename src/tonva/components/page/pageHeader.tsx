@@ -18,7 +18,8 @@ export class PageHeader extends React.Component<PageHeaderProps> {
 		if (afterBack) afterBack();
     }
     openWindow() {
-        window.open(document.location.href);
+        //window.open(document.location.href);
+        window.open(window.location.href);
     }
     private logoutClick = () => {
         nav.showLogout(this.logout);
@@ -70,7 +71,8 @@ export class PageHeader extends React.Component<PageHeaderProps> {
             }
         }
         if (window.self !== window.top) {
-            console.log(document.location.href);
+            //console.log(document.location.href);
+            console.log(window.location.href);
             // pop = <header onClick={this.openWindow} className="mx-1"><FA name="external-link" /></header>;
         }
         if (back === undefined && typeof center === 'string') {

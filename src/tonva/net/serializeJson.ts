@@ -1,3 +1,4 @@
+import _ from 'lodash';
 
 export function serializeJson(obj:any):string {
     let source:any[] = [];
@@ -83,7 +84,7 @@ export function deserializeJson(str:string):any {
 
     function deserial(obj:any) {
         if (typeof obj === 'string') {
-            if (obj.startsWith('___') === true) {
+            if (_.startsWith(obj, '___') === true) {
                 let p = Number(obj.substr(3));
                 let ret = arr[p];
                 deserialize(ret);

@@ -5,6 +5,7 @@ import { observer } from 'mobx-react';
 import { observable } from 'mobx';
 import { userApi } from '../net';
 import { User } from '../tool';
+import _ from 'lodash';
 
 export type UserLoader = (userId:number)=>Promise<any>;
 
@@ -84,7 +85,7 @@ export const UserIcon = observer((props: UserIconProps):JSX.Element => {
             <i className="fa fa-file-o" />
         </div>;
     }
-    if (icon.startsWith(':') === true) {
+    if (_.startsWith(icon, ':') === true) {
         icon = nav.resUrl + icon.substr(1);
     }
     return <img src={icon} className={className} alt="img"

@@ -12,7 +12,7 @@ async function startApp() {
 	//如果要支持route，必须调用下面这一句
 	//await startRoute(appConfig);
 	const App: React.FC = () => {
-		const onLogined = async (isUserLogin?:boolean) => {
+		const onLogined = async (isUserLogin?: boolean) => {
 			await start(CApp, appConfig, isUserLogin);
 		}
 		return <NavView onLogined={onLogined} />;
@@ -31,24 +31,33 @@ async function startApp() {
 	serviceWorker.unregister();
 }
 
+class testa {
+	p: string;
+	constructor(s:string) {
+		this.p = s;
+	}
+}
+
 export default function createApp() {
+	let a = new testa('akdk');
+	console.log(a);
 	nav.setSettings(appConfig);
-  const container = document.createElement('div')
-  container.id = 'app'
-  document.body.appendChild(container)
+	const container = document.createElement('div')
+	container.id = 'app'
+	document.body.appendChild(container)
 	const App: React.FC = () => {
-		const onLogined = async (isUserLogin?:boolean) => {
+		const onLogined = async (isUserLogin?: boolean) => {
 			await start(CApp, appConfig, isUserLogin);
 		}
 		return <NavView onLogined={onLogined} />;
 	}
 
-  ReactDOM.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>,
-    container
-  );
+	ReactDOM.render(
+		<React.StrictMode>
+			<App />
+		</React.StrictMode>,
+		container
+	);
 }
 
 "undefined" != typeof wx && wx.getSystemInfoSync || startApp()

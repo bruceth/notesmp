@@ -1,4 +1,5 @@
 import { env } from '../tool';
+import _ from 'lodash';
 
 const centerHost = process.env['REACT_APP_CENTER_HOST'];
 const centerDebugHost = 'localhost:3000'; //'192.168.86.64';
@@ -36,14 +37,14 @@ const hosts:{[name:string]:HostValue} = {
 const httpArr = ['https://', 'http://'];
 function isAbsoluteUrl(url:string):boolean {
     for (let str of httpArr) {
-        if (url.startsWith(str) === true) return true;
+        if (_.startsWith(url, str) === true) return true;
     }
     return false;
 }
 
 function urlFromHost(host:string):string {
     if (isAbsoluteUrl(host) === true) {
-        if (host.endsWith('/')) return host;
+        if (_.endsWith(host, '/')) return host;
         return host + '/';
     }
     return `http://${host}/`;
@@ -54,9 +55,9 @@ function centerUrlFromHost(host:string):string {
 }
 function centerWsFromHost(host:string) {
     let https = 'https://';
-    if (host.startsWith(https) === true) {
+    if (_.startsWith(host, https) === true) {
         host = host.substr(https.length);
-        if (host.endsWith('/') === true) host = host.substr(0, host.length-1);
+        if (_.endsWith(host, '/') === true) host = host.substr(0, host.length-1);
         return 'wss://' + host + '/tv/';
     }
     return `ws://${host}/tv/`
@@ -130,12 +131,12 @@ class Host {
 
     private getCenterHost():string {
         let {value, local} = hosts.centerhost;
-        if (document.location) {
-            let hash = document.location.hash;
+        //if (document.location) {
+            let hash = window.location.hash;
             if (hash && hash.includes('sheet_debug') === true) {
                 return value;
             }
-        }
+        //}
         if (env.isDevelopment === true) {
             if (local === true) return value;
         }
@@ -144,10 +145,12 @@ class Host {
 
     private getResHost():string {
         let {value, local} = hosts.reshost;
-        let hash = document.location.hash;
-        if (hash.includes('sheet_debug') === true) {
-            return value;
-        }
+        //if (document.location) {
+            let hash = window.location.hash;
+            if (hash.includes('sheet_debug') === true) {
+                return value;
+            }
+        //}
         if (env.isDevelopment === true) {
             if (local === true) return value;
         }
@@ -179,7 +182,7 @@ class Host {
             path = 'uq/prod/' + db + '/';
         }
 		url = this.getUrlOrDebug(url);
-		if (url.endsWith('/') === false) {
+		if (_.endsWith(url, '/') === false) {
 			url += '/';
 		}
         return url + path;

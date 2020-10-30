@@ -4,7 +4,7 @@ import {HttpChannelUI} from './httpChannelUI';
 import {nav} from '../components/nav';
 import { Caller } from './caller';
 import { env } from '../tool';
-
+import _ from 'lodash';
 /*
 export async function httpGet(url:string, params?:any):Promise<any> {
     let channel = new HttpChannel(false, url, undefined, undefined);
@@ -197,7 +197,7 @@ export abstract class HttpChannel {
             this.endWait(url, reject);
             if (typeof error === 'string') {
                 let err = error.toLowerCase();
-                if (err.startsWith('unauthorized') === true) {
+                if (_.startsWith(err, 'unauthorized') === true) {
                     nav.logout();
                     return;
                 }

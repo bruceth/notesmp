@@ -13,7 +13,7 @@ import {guestApi, logoutApis, setCenterUrl, setCenterToken, appInFrame, host, re
 import { resOptions } from '../res/res';
 import { Loading } from './loading';
 import { Navigo, RouteFunc, Hooks, NamedRoute } from './navigo';
-
+import _ from 'lodash';
 import 'font-awesome/css/font-awesome.min.css';
 import '../css/va-form.css';
 import '../css/va.css';
@@ -496,15 +496,15 @@ export class Nav {
     private centerHost: string;
     private arrs = ['/test', '/test/'];
     private unitJsonPath():string {
-        let {origin, pathname} = document.location;
+        let {origin, pathname} = window.location; //document.location;
 		pathname = pathname.toLowerCase();
         for (let item of this.arrs) {
-            if (pathname.endsWith(item) === true) {
+            if (_.endsWith(pathname, item) === true) {
                 pathname = pathname.substr(0, pathname.length - item.length);
                 break;
             }
         }
-        if (pathname.endsWith('/') === true || pathname.endsWith('\\') === true) {
+        if (_.endsWith(pathname, '/') === true || _.endsWith(pathname, '\\') === true) {
             pathname = pathname.substr(0, pathname.length-1);
         }
         return origin + pathname + '/unit.json';
@@ -532,13 +532,16 @@ export class Nav {
 	
 	async init() {
 		this.testing = env.testing;
-		await host.start(this.testing);
-		let hash = document.location.hash;
-		if (hash !== undefined && hash.length > 0) {
-			let pos = getExHashPos();
-			if (pos < 0) pos = undefined;
-			this.hashParam = hash.substring(1, pos);
-		}
+        await host.start(this.testing);
+        //if (document.location) {
+            let hash = window.location.hash;
+            if (hash !== undefined && hash.length > 0) {
+                let pos = getExHashPos();
+                if (pos < 0) pos = undefined;
+                this.hashParam = hash.substring(1, pos);
+            }
+        //}
+        
 		let {url, ws, resHost} = host;
 		this.centerHost = url;
 		this.resUrl = resUrlFromHost( resHost);
@@ -743,7 +746,7 @@ export class Nav {
     }
 
     private async getPrivacy(privacy:string):Promise<string> {
-        const headers = new  Headers({
+        const headers = new Headers({
             "Content-Type":'text/plain'
        })
         let pos = privacy.indexOf('://');
@@ -927,7 +930,8 @@ export class Nav {
             let registration =await Promise.race([waiting, navigator.serviceWorker.ready]);
             if (registration) registration.unregister();
         }
-		window.document.location.reload();
+        //window.document.location.reload();
+        window.location.reload();
 		// dcloud hbuilder里面的app自动升级，需要清webview的缓存
 		let plus = (window as any).plus;
 		if (plus) {
