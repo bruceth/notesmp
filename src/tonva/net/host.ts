@@ -1,9 +1,9 @@
 import { env } from '../tool';
 import _ from 'lodash';
 
-const centerHost = process.env['REACT_APP_CENTER_HOST'];
+const centerHost = process.env.isMiniprogram ? 'https://tv.jkchemical.com' : process.env['REACT_APP_CENTER_HOST'];
 const centerDebugHost = 'localhost:3000'; //'192.168.86.64';
-const resHost = process.env['REACT_APP_RES_HOST'] || centerHost;
+const resHost = process.env.isMiniprogram ? 'https://tv.jkchemical.com' :process.env['REACT_APP_RES_HOST'] || centerHost;
 const resDebugHost = 'localhost:3015'; //'192.168.86.63';
 const uqDebugHost = 'localhost:3015'; //'192.168.86.63';
 const uqDebugBuilderHost = 'localhost:3009';
