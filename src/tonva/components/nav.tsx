@@ -746,9 +746,11 @@ export class Nav {
     }
 
     private async getPrivacy(privacy:string):Promise<string> {
-        const headers = new Headers({
-            "Content-Type":'text/plain'
-       })
+        //const headers = new Headers({
+        //    "Content-Type":'text/plain'
+        //})
+        let headers:{[name:string]: string} = {}; //new Headers();
+        headers['Content-Type'] = 'text/plain';
         let pos = privacy.indexOf('://');
         if (pos > 0) {
             let http = privacy.substring(0, pos).toLowerCase();

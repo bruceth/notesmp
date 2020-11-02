@@ -21,7 +21,8 @@ module.exports = {
   appExtraConfig: {
     sitemapLocation: 'sitemap.json',
   },
-  global: {},
+  global: {
+  },
   pages: {},
   optimization: {
     domSubTreeLevel: 10,
@@ -36,6 +37,6 @@ module.exports = {
   },
   projectConfig: {
     projectname: '小单',
-    appid: '',
+    appid: 'wx4d9fa3c8409812be',
   },
 }

@@ -31,16 +31,7 @@ async function startApp() {
 	serviceWorker.unregister();
 }
 
-class testa {
-	p: string;
-	constructor(s:string) {
-		this.p = s;
-	}
-}
-
 export default function createApp() {
-	let a = new testa('akdk');
-	console.log(a);
 	nav.setSettings(appConfig);
 	const container = document.createElement('div')
 	container.id = 'app'

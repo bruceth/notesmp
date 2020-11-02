@@ -1,10 +1,12 @@
-import {bridgeCenterApi, isBridged} from './appBridge';
-import {FetchError} from './fetchError';
-import {HttpChannelUI} from './httpChannelUI';
-import {nav} from '../components/nav';
+import { bridgeCenterApi, isBridged } from './appBridge';
+import { FetchError } from './fetchError';
+import { HttpChannelUI } from './httpChannelUI';
+import { nav } from '../components/nav';
 import { Caller } from './caller';
 import { env } from '../tool';
-import _ from 'lodash';
+
+const wxfetch = process.env.isMiniprogram ? require('./wxfetch') : undefined;
+
 /*
 export async function httpGet(url:string, params?:any):Promise<any> {
     let channel = new HttpChannel(false, url, undefined, undefined);
@@ -27,11 +29,11 @@ export abstract class HttpChannel {
     protected hostUrl: string;
     protected apiToken: string;
 
-    constructor(hostUrl: string, apiToken:string, ui?: HttpChannelUI) {
+    constructor(hostUrl: string, apiToken: string, ui?: HttpChannelUI) {
         this.hostUrl = hostUrl;
         this.apiToken = apiToken;
         this.ui = ui;
-        this.timeout = env.isDevelopment === true? 500000:50000;
+        this.timeout = env.isDevelopment === true ? 500000 : 50000;
     }
 
     private startWait = (waiting: boolean) => {
@@ -40,12 +42,12 @@ export abstract class HttpChannel {
         }
     }
 
-    private endWait = (url?:string, reject?:(reason?:any)=>void) => {
+    private endWait = (url?: string, reject?: (reason?: any) => void) => {
         if (this.ui !== undefined) this.ui.endWait();
         if (reject !== undefined) reject('访问webapi超时 ' + url);
     }
 
-    private showError = async (error:FetchError) => {
+    private showError = async (error: FetchError) => {
         if (this.ui !== undefined) await this.ui.showError(error);
     }
 
@@ -53,13 +55,14 @@ export abstract class HttpChannel {
         this.post('', {});
     }
 
-    async xcall(urlPrefix:string, caller:Caller<any>): Promise<void> {
+    async xcall(urlPrefix: string, caller: Caller<any>): Promise<void> {
         let options = this.buildOptions();
-        let {headers, path, method} = caller;
+        let { headers, path, method } = caller;
         if (headers !== undefined) {
             let h = options.headers;
             for (let i in headers) {
-                h.append(i, encodeURI(headers[i]));
+                //h.append(i, encodeURI(headers[i]));
+                h[i] = encodeURI(headers[i]);
             }
         }
         options.method = method;
@@ -113,7 +116,7 @@ export abstract class HttpChannel {
         options.body = JSON.stringify(params);
         return await this.innerFetchResult(url, options, waiting);
     }
-    async fetch(url: string, options: any, waiting: boolean, resolve:(value?:any)=>any, reject:(reason?:any)=>void):Promise<void> {
+    async fetch(url: string, options: any, waiting: boolean, resolve: (value?: any) => any, reject: (reason?: any) => void): Promise<void> {
         let that = this;
         this.startWait(waiting);
         let path = url;
@@ -124,7 +127,7 @@ export abstract class HttpChannel {
                     break;
                 case 'object':
                     let keys = Object.keys(err);
-                    let retErr:any = {
+                    let retErr: any = {
                         ex: ex,
                     };
                     for (let key of keys) {
@@ -143,7 +146,7 @@ export abstract class HttpChannel {
             }
         }
         try {
-            console.log('%s-%s %s', options.method, path, options.body || '');
+            console.log('%s-%s %s : %s', options.method, path, options.body || '', options.params);
             let now = Date.now();
             let timeOutHandler = env.setTimeout(
                 undefined, //'httpChannel.fetch',
@@ -151,16 +154,30 @@ export abstract class HttpChannel {
                     that.endWait(url + ' timeout endWait: ' + (Date.now() - now) + 'ms', reject);
                 },
                 this.timeout);
-            let res = await fetch(encodeURI(path), options);
+            let res;
+            let url = encodeURI(path);
+            if (process.env.isMiniprogram) {
+                let config = {
+                    url:url,
+                    method:options.method,
+                    params:options.body ? options.body : {},
+                    v: '1.0'
+                }
+                res = await wxfetch(config, undefined) as Response;
+                console.log(res);
+            }
+            else {
+                res = await fetch(url, options);
+            }
             if (res.ok === false) {
                 env.clearTimeout(timeOutHandler);
-                console.log('ok false endWait');       
+                console.log('ok false endWait');
                 that.endWait();
                 console.log('call error %s', res.statusText);
                 throw res.statusText;
             }
             let ct = res.headers.get('content-type');
-            if (ct && ct.indexOf('json')>=0) {
+            if (ct && ct.indexOf('json') >= 0) {
                 return res.json().then(async retJson => {
                     env.clearTimeout(timeOutHandler);
                     that.endWait();
@@ -193,23 +210,24 @@ export abstract class HttpChannel {
                 resolve(text);
             }
         }
-        catch(error) {
+        catch (error) {
             this.endWait(url, reject);
             if (typeof error === 'string') {
                 let err = error.toLowerCase();
-                if (_.startsWith(err, 'unauthorized') === true) {
+                if (err.startsWith('unauthorized') === true) {
                     nav.logout();
                     return;
                 }
             }
             console.error('fecth error (no nav.showError): ' + url);
+            console.error(error);
             // await this.showError(buildError(error, 'catch outmost'));
         };
     }
 
     protected abstract async innerFetch(url: string, options: any, waiting: boolean): Promise<any>;
 
-    async callFetch(url:string, method:string, body:any):Promise<any> {
+    async callFetch(url: string, method: string, body: any): Promise<any> {
         let options = this.buildOptions();
         options.method = method;
         options.body = body;
@@ -218,7 +236,8 @@ export abstract class HttpChannel {
         });
     }
 
-    private buildOptions(): {method:string; headers:Headers; body:any} {
+    //private buildOptions(): {method:string; headers:Headers; body:any} {
+    private buildOptions(): { method: string; headers: { [name: string]: string }; body: any } {
         let headers = this.buildHeaders();
         let options = {
             headers: headers,
@@ -229,6 +248,7 @@ export abstract class HttpChannel {
         return options;
     }
 
+    /*
     protected buildHeaders():Headers {
         let {language, culture} = nav;
         let headers = new Headers();
@@ -239,6 +259,23 @@ export abstract class HttpChannel {
         headers.append('Accept-Language', lang);
         if (this.apiToken) { 
             headers.append('Authorization', this.apiToken); 
+        }
+        return headers;
+    }
+    */
+    protected buildHeaders(): { [name: string]: string } {
+        let { language, culture } = nav;
+        let headers: { [name: string]: string } = {}; //new Headers();
+        //headers.append('Access-Control-Allow-Origin', '*');
+        //headers.append('Content-Type', 'application/json;charset=UTF-8');
+        headers['Content-Type'] = 'application/json;charset=UTF-8';
+        let lang = language;
+        if (culture) lang += '-' + culture;
+        //headers.append('Accept-Language', lang);
+        headers['Accept-Language'] = lang;
+        if (this.apiToken) {
+            //headers.append('Authorization', this.apiToken); 
+            headers['Authorization'] = this.apiToken;
         }
         return headers;
     }

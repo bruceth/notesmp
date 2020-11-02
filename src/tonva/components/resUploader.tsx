@@ -45,9 +45,11 @@ export class ResUploader extends React.Component<ResUploaderProps> {
         if (!formData) formData = this.buildFormData();
         try {
             nav.startWait();
-            let headers = new Headers();
-            headers.append('Access-Control-Allow-Origin', '*');
-            //2019-12-18：因为 vivo按oppo某些版本不支持，暂时先不要 
+            //let headers = new Headers();
+            //headers.append('Access-Control-Allow-Origin', '*');
+            let headers:{[name:string]: string} = {}; //new Headers();
+            headers['Access-Control-Allow-Origin'] = '*';
+                //2019-12-18：因为 vivo按oppo某些版本不支持，暂时先不要 
             //let abortController = new AbortController();
             let res = await fetch(resUrl, {
                 method: "POST",
