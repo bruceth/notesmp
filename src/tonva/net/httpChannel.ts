@@ -4,8 +4,7 @@ import { HttpChannelUI } from './httpChannelUI';
 import { nav } from '../components/nav';
 import { Caller } from './caller';
 import { env } from '../tool';
-
-const wxfetch = process.env.isMiniprogram ? require('./wxfetch') : undefined;
+import wxfetch from 'wxapp-fetch';
 
 /*
 export async function httpGet(url:string, params?:any):Promise<any> {
@@ -157,17 +156,12 @@ export abstract class HttpChannel {
             let res;
             let url = encodeURI(path);
             if (process.env.isMiniprogram) {
-                let config = {
-                    url:url,
-                    method:options.method,
-                    params:options.body ? options.body : {},
-                    v: '1.0'
-                }
-                res = await wxfetch(config, undefined) as Response;
+                res = await wxfetch(url, options) as Response;
                 console.log(res);
             }
             else {
                 res = await fetch(url, options);
+                console.log(res);
             }
             if (res.ok === false) {
                 env.clearTimeout(timeOutHandler);
@@ -176,8 +170,17 @@ export abstract class HttpChannel {
                 console.log('call error %s', res.statusText);
                 throw res.statusText;
             }
-            let ct = res.headers.get('content-type');
-            if (ct && ct.indexOf('json') >= 0) {
+            let jres:boolean = false;
+            if (process.env.isMiniprogram) {
+                jres = true;
+            }
+            else {
+                let ct = res.headers.get('content-type');
+                if (ct && ct.indexOf('json') >= 0) {
+                    jres = true;
+                }
+            }
+            if (jres) {
                 return res.json().then(async retJson => {
                     env.clearTimeout(timeOutHandler);
                     that.endWait();

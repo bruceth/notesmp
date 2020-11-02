@@ -95,6 +95,7 @@ module.exports = {
         loader: 'babel-loader',
         exclude: /node_modules/,
         options: {
+          sourceType: 'unambiguous',
           presets: [
             '@babel/react', // 支持react
             '@babel/typescript', // 支持typescript
