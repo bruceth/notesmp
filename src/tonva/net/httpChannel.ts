@@ -161,7 +161,6 @@ export abstract class HttpChannel {
             }
             else {
                 res = await fetch(url, options);
-                console.log(res);
             }
             if (res.ok === false) {
                 env.clearTimeout(timeOutHandler);

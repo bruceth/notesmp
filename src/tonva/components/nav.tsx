@@ -21,6 +21,7 @@ import '../css/animation.css';
 import { FA } from './simple';
 import { userApi } from '../net';
 import { ReloadPage, ConfirmReloadPage } from './reloadPage';
+import lv from '../entry/login'
 
 const regEx = new RegExp('Android|webOS|iPhone|iPad|' +
     'BlackBerry|Windows Phone|'  +
@@ -772,9 +773,10 @@ export class Nav {
     }
 
     async showLogin(callback?: (user:User)=>Promise<void>, withBack?:boolean) {
-        let lv = await import('../entry/login');
+        //let lv = await import('../entry/login');
+        
         let loginView = React.createElement(
-			lv.default, 
+			lv, 
 			{withBack, callback}
 		);
         if (withBack !== true) {
