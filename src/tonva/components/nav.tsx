@@ -442,7 +442,10 @@ export class Nav {
 		}
 	}
 
-    private async getPredefinedUnitName() {		
+    private async getPredefinedUnitName() {	
+        if (process.env.isMiniprogram) {
+            return '百灵威';
+        }
 		let el = document.getElementById('unit');
 		if (el) {
 			return el.innerText;
