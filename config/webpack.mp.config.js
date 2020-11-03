@@ -138,7 +138,7 @@ module.exports = {
         // Also exclude `html` and `json` extensions so they get processed
         // by webpacks internal loaders.
         options: {
-          name: 'http://node.jjol.cn/static/media/[name][hash:8].[ext]',
+          name: 'http://node.jjol.cn/static/media/[name].[hash:8].[ext]',
         },
       },
     ],
