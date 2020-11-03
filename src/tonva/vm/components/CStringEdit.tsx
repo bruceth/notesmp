@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import { FA, Page } from '../../../tonva';
+import { FA, Page } from '../../components';
 import { Controller } from "../controller";
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';

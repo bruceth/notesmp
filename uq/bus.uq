@@ -1,0 +1,12 @@
+Bus BusBookProject FROM /[book-project]
+    ACCEPT proof {
+		VAR projectId ID, note ID;
+		SET projectId=1;
+		set note=999;
+        BOOK BookFlow at (projectId, $date) SET debit=debit, credit=credit, memo=memo, note=note;
+    };
+
+ACTION TestBusBootProject(
+) {
+	Bus BusBookProject.Proof SET project='看看2', debit=98, memo='test bus';
+};

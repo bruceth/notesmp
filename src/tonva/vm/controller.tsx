@@ -1,6 +1,6 @@
 import * as React from 'react';
 import _ from 'lodash';
-import {nav, Page, resOptions} from '../components';
+import {nav, Page, resOptions, PageHeaderProps, PageWebNav} from '../components';
 import { User, env } from '../tool';
 import { VPage } from './vpage';
 import { View } from './view';
@@ -15,6 +15,14 @@ export interface ConfirmOptions {
     no?: string;
 }
 
+export interface WebNav<C extends Controller> {
+	VNavHeader?: new (controller: C) => View<C>;
+	VNavRawHeader?: new (controller: C) => View<C>;
+	VNavFooter?: new (controller: C) => View<C>;
+	VNavRawFooter?: new (controller: C) => View<C>;
+	renderPageHeader?: (props: PageHeaderProps) => JSX.Element;
+}
+
 export abstract class Controller {
     readonly res: any;
 	readonly x: any;
@@ -22,7 +30,8 @@ export abstract class Controller {
 	readonly t: (str:string)=>any;
     icon: string|JSX.Element;
     label:string;
-    readonly isDev:boolean = env.isDevelopment;
+	readonly isDev:boolean = env.isDevelopment;
+	readonly pageWebNav: PageWebNav;
     get user():User {return nav.user}
     get isLogined():boolean {
         let {user} = nav;
@@ -33,12 +42,39 @@ export abstract class Controller {
         this.res = res || {};
 		this.x = this.res.x || {};
 		this.t = (str:string):any => this.internalT(str) || str;
+		this.pageWebNav = this.getPageWebNav();
 	}
 
 	init(...param: any[]) {}
 
 	internalT(str:string):any {
 		return this._t[str];
+	}
+
+	get webNav(): WebNav<any> {return undefined;}
+
+	getWebNav(): WebNav<any> {return this.webNav;}
+
+	private getPageWebNav(): PageWebNav {
+		let webNav =  this.getWebNav();
+		if (webNav === undefined) return;
+		let {VNavHeader, VNavRawHeader, VNavFooter, VNavRawFooter, renderPageHeader} = webNav;
+		let navHeader:JSX.Element;
+		if (VNavHeader) navHeader = this.renderView(VNavHeader);
+		let navRawHeader:JSX.Element;
+		if (VNavRawHeader) navRawHeader = this.renderView(VNavRawHeader);
+		let navFooter:JSX.Element; 
+		if (VNavFooter) navFooter = this.renderView(VNavFooter);
+		let navRawFooter:JSX.Element;
+		if (VNavRawFooter) navRawFooter = this.renderView(VNavRawFooter);
+		let ret:PageWebNav = {
+			navHeader,
+			navRawHeader,
+			navFooter,
+			navRawFooter,
+			renderPageHeader,
+		};
+		return ret;
 	}
 	
 	protected setRes(res:any) {

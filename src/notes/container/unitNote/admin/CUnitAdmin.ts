@@ -3,11 +3,11 @@ import _ from 'lodash';
 import { EnumNoteType } from "../../../../notes/model";
 import { renderIcon } from "../../../../notes/noteBase";
 import { CUqBase } from "../../../../tapp";
-import { EnumUnitRole, MemberItem, UnitItem } from "../CUnitNote";
 import { VRootProjects } from "./VRootProjects";
 import { VUnitProjects } from "./VUnitProjects";
 import { VReportsAdmin } from "./VReportsAdmin";
 import { VAdminBase, VUnitAdmin, VRootAdmin } from "./VUnitAdmin";
+import { BookProject, BookReport, EnumUnitRole, MemberItem, UnitItem } from "../model";
 
 export class CAdminBase  extends CUqBase {
 	isChanged: boolean = false;
@@ -212,31 +212,6 @@ export class CAdminBase  extends CUqBase {
 export class CUnitAdmin extends CAdminBase {
 }
 
-export interface BookProject {
-	id: number;
-	name: string;
-	caption: string;
-	memo: string;
-	ratioX: number;					// ratioX / ratioY 是显示内容值
-	ratioY: number;
-	readUnit: string;
-	$create: Date;
-	$update: Date;
-	orderNo: number;
-}
-export interface ReportProject {
-	owner: number;
-	id: number;
-	project: number;
-	header: string;
-	readUnit: string;
-}
-export interface BookReport {
-	id: number;
-	rootUnit: number;
-	caption: string;
-	projects: ReportProject[];
-}
 export class CRootAdmin extends CAdminBase {
 	project: BookProject;
 	@observable bookProjects: BookProject[];

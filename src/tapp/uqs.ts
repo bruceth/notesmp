@@ -1,4 +1,4 @@
-import { Tuid, Query, Action/*, Map, Sheet, Tag*/ } from "tonva";
+import { Tuid, Query, Action/*, Map, Sheet, Tag*/ } from "../tonva";
 
 export enum EnumSpecFolder {notes=1};
 
@@ -63,6 +63,10 @@ export interface Notes {
 	GetRootUnitReports: Query;
 	GetUnitProjects: Query;
 	SetUnitProjects: Action;
+	GetUnitSum: Query;
+	GetMySum: Query;
+
+	TestBusBootProject: Action;
 };
 
 export interface UQs {

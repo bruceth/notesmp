@@ -48,6 +48,7 @@ export abstract class VPage<C extends Controller> extends View<C> {
 			afterBack={()=>this.afterBack()}
 			tabsProps={this.tabsProps}
 			logout={this.logout()}
+			webNav={this.controller.pageWebNav}
 		>
 			{this.content()}
 		</Page>;

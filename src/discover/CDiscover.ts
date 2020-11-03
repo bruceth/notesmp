@@ -19,4 +19,8 @@ export class CDiscover extends CUqBase {
 
 	tab = () => this.renderView(VDiscover);
 
+	async testBus() {
+		await this.uqs.notes.TestBusBootProject.submit({});
+		alert('test bus');
+	}
 }

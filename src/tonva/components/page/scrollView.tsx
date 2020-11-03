@@ -1,5 +1,5 @@
-import React from 'react';
-import classNames from 'classnames';
+import React, { CSSProperties } from 'react';
+import { PageHeaderProps } from './pageHeader';
 
 const scrollAfter = 20; // 20ms之后，scroll执行
 export class Scroller {
@@ -27,12 +27,12 @@ interface ScrollViewProps extends ScrollProps {
 	style?: React.CSSProperties;
 }
 const scrollTimeGap = 100;
-export class ScrollView extends React.Component<ScrollViewProps, null> {
+abstract class ScrollViewBase<T extends ScrollViewProps> extends React.Component<T, null> {
     private bottomTime:number = 0;
 	private topTime:number = 0;
 	private div: HTMLDivElement;
 
-	private refDiv = (div:HTMLDivElement) => {
+	protected refDiv = (div:HTMLDivElement) => {
 		if (!div) {
 			if (this.div) {
 				this.div.removeEventListener('resize', this.onResize)
@@ -47,7 +47,7 @@ export class ScrollView extends React.Component<ScrollViewProps, null> {
 		console.error('div resize');
 	};
 
-    private onScroll = async (e:any) => {
+    protected onScroll = async (e:any) => {
         let {onScroll, onScrollTop, onScrollBottom} = this.props;
         if (onScroll) this.props.onScroll(e);
         let el = e.target as HTMLBaseElement;
@@ -94,10 +94,12 @@ export class ScrollView extends React.Component<ScrollViewProps, null> {
             this.eachChild(child, direct);
         });
 	}
-	
+}
+
+export class ScrollView extends ScrollViewBase<ScrollViewProps> {
     render() {
 		let {className, style} = this.props;
-		return <div ref={this.refDiv} className={classNames('tv-page')}
+		return <div ref={this.refDiv} className="tv-page"
 			onScroll={this.onScroll} style={style}>
 			<article className={className}>
 				{this.props.children}
@@ -106,3 +108,34 @@ export class ScrollView extends React.Component<ScrollViewProps, null> {
     }
 }
 
+export interface PageWebNav {
+	navHeader?: JSX.Element; 
+	navRawHeader?: JSX.Element; 
+	navFooter?: JSX.Element; 
+	navRawFooter?: JSX.Element; 
+	renderPageHeader?: (props:PageHeaderProps)=>JSX.Element;
+}
+interface WebNavScrollViewProps extends ScrollViewProps {
+	webNav: PageWebNav;
+}
+
+export class WebNavScrollView extends ScrollViewBase<WebNavScrollViewProps> {
+    render() {
+		let {className, style, webNav} = this.props;
+		let {navHeader, navRawHeader, navFooter, navRawFooter} = webNav;
+		let vHeader:any, vFooter:any;
+		if (navRawHeader) vHeader = navRawHeader;
+		else if (navHeader) vHeader = <header><main>{navHeader}</main></header>
+		if (navRawFooter) vFooter = navRawFooter;
+		else if (navFooter) vFooter = <footer><main>{navFooter}</main></footer>
+
+		return <div ref={this.refDiv} className="tv-page-webnav"
+			onScroll={this.onScroll} style={style}>
+			{vHeader}
+			<article className={className}>
+				{this.props.children}
+			</article>
+			{vFooter}
+		</div>;
+    }
+}

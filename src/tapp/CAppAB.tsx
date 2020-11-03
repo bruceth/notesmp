@@ -1,6 +1,6 @@
 import React from 'react';
+import { navigo, View, VPage, WebNav } from '../tonva';
 import { CUqApp } from "./CBase";
-import { navigo } from 'tonva/components/navigo';
 
 export class CAppAB extends CUqApp {
 	protected async internalStart() {
@@ -24,6 +24,35 @@ export class CAppCD extends CUqApp {
 
 export class CAppBBBBCCCC extends CUqApp {
 	protected async internalStart() {
-		this.openPage(<div>/bbbb/cccc</div>)
+		this.openVPage(VAppBBBBCCCC);
+	}
+
+	get webNav(): WebNav<any> {
+		return {
+			VNavHeader: VNavWebHeader, 
+			VNavFooter: VNavWebFooter,
+		}
+	}
+}
+
+class VAppBBBBCCCC extends VPage<CAppBBBBCCCC> {
+	header() {return 'VAppBBBBCCCC'}
+	content() {
+		return <div>
+			<div>page content</div>
+			/bbbb/cccc
+		</div>;
+	}
+}
+
+class VNavWebHeader extends View<CAppBBBBCCCC> {
+	render() {
+		return <div>VNavWebHeader</div>;
+	}
+}
+
+class VNavWebFooter extends View<CAppBBBBCCCC> {
+	render() {
+		return <div>vNavWebFooter</div>;
 	}
 }

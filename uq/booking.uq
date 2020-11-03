@@ -15,7 +15,9 @@ TUID BookProject (
 TUID BookUserProject (
 	id,
 	owner ID [$User],
+	unit ID,
 	project ID BookProject,
+	INDEX owner_unit_project (owner, unit, project) UNIQUE,
 );
 
 MAP BookUserProjectSetting (
@@ -353,3 +355,210 @@ ACTION SetUnitProjects(
 		BOOK BookUnitProject AT(unit, project) SET orderNo=orderNo;
 	}
 };
+
+ENUM EnumPeriod (day=1, week=2, month=3, year=4);
+QUERY GetUnitSum ver 1.2 (
+	unit ID,
+	at Date,
+	period TINYINT,			// 1=day, 2=week, 3=month, 4=year
+)
+RETURNS projects (
+	id ID,
+	name CHAR(100),
+	caption CHAR(100),
+	memo CHAR(100),
+	ratioX INT DEFAULT 1,		-- ratioX / ratioY 是显示内容值
+	ratioY INT DEFAULT 1,
+	readUnit CHAR(20),			-- 显示单位
+	[$create] TIMESTAMP, 
+	[$update] TIMESTAMP,
+)
+RETURNS subSum (
+	unit ID,
+	project ID,
+	debit DEC(16,4),
+	credit DEC(16,4),
+)
+RETURNS memberSum (
+	member ID,
+	project ID,
+	debit DEC(16,4),
+	credit DEC(16,4),
+) {
+	-- 获取startTime 和 endTime
+	VAR theDay TIMESTAMP, startTime TIMESTAMP, endTime TIMESTAMP;
+	IF at IS NULL {
+		SET theDay=date(now());
+	}
+	ELSE {
+		SET theDay=date(at);
+	}
+	IF period=1 {
+		SET startTime=theDay;
+		SET endTime=DATEADD(day, 1, theDay);
+	}
+	ELSEIF period=2 {
+		-- 星期一0点开始的一周
+		SET startTime=DATEADD(day, -WEEKDAY(theDay), theDay);
+		SET endTime=DATEADD(day, 7, startTime);
+	}
+	ELSEIF period=3 {
+		SET startTime=DATEADD(day, -DAY(theDay)+1, theDay);
+		SET endTime=DATEADD(month, 1, startTime);
+	}
+	ELSEIF period=4 {
+		SET startTime=CONCAT(YEAR(theDay), '-1-1');
+		SET endTime=DATEADD(year, 1, startTime);
+	}
+
+	-- 获取rootUnit
+	VAR rootUnit ID;
+	WHILE 1=1 {
+		VAR p ID = unit, parentUnit ID;
+		SET parentUnit=a.note0 FROM Note2Note as a WHERE a.note1=p;
+		IF parentUnit IS NULL { 
+			SET rootUnit = p;
+			break;
+		}
+	}
+
+	-- 获取 unit projects
+	TABLE tblUnitProjects (KEY project ID, orderNo SMALLINT);
+	INTO tblUnitProjects SELECT a.project, a.orderNo FROM BookUnitProject as a WHERE a.unit=unit;
+	IF (SELECT count(*) FROM tblUnitProjects)=0 {
+		INTO tblUnitProjects SELECT a.id as project, a.id as orderNo FROM BookProject as a WHERE a.rootUnit=rootUnit;
+	}
+
+	TABLE treeUnits (KEY level TINYINT, KEY unit ID, unit1 ID);
+	TABLE levelUnits (KEY unit ID, unit1 ID);
+	TABLE unitMembers (KEY unit ID, KEY member ID);
+	VAR level TINYINT = 1;
+	INTO treeUnits SELECT level as level, a.note1 as unit, a.note1 as unit1
+		FROM Note2Note as a WHERE a.note0=rootUnit;
+	WHILE 1=1 {
+		DELETE FROM levelUnits WHERE 1=1;
+		INTO levelUnits
+			SELECT a.unit, b.note1 as unit1
+				FROM treeUnits as a
+					JOIN Note2Note as b ON a.unit1=b.note0
+				WHERE a.level=level;
+		IF (SELECT count(*) FROM levelUnits as a WHERE 1=1)>0 {
+			SET level=level+1;
+			INTO treeUnits IGNORE SELECT level as level, a.unit, a.unit1 FROM levelUnits as a;
+		}
+		ELSE {
+			BREAK;
+		}
+	}
+	INTO unitMembers IGNORE 
+		SELECT a.unit, b.member FROM treeUnits as a LEFT JOIN UnitFolder as b ON a.unit1=b.unit;
+	INTO subSum
+		SELECT unit as unit, bookProject as project, ifnull(sum(d.debit),0) as debit, ifnull(sum(d.credit),0) as credit
+			FROM unitMembers as a 
+				JOIN tblUnitProjects as b ON 1=1 -- c.project=b.project
+				LEFT JOIN BookUserProject as c ON c.unit=a.unit AND c.owner=a.member AND c.project=b.project
+				LEFT JOIN BookFlow as d ON d.project=c.id AND d.stamp>=startTime AND d.stamp<endTime
+			WHERE 1=1
+			GROUP BY a.unit as unit, b.project as bookProject
+			ORDER BY unit, bookProject;
+	INTO memberSum
+		SELECT member, bookProject as project, ifnull(sum(d.debit),0) as debit, ifnull(sum(d.credit),0) as credit
+			FROM UnitFolder as a
+				JOIN tblUnitProjects as b ON 1=1 -- c.project=b.project
+				LEFT JOIN BookUserProject as c ON c.unit=a.unit AND c.owner=a.member AND c.project=b.project
+				LEFT JOIN BookFlow as d ON d.project=c.id AND d.stamp>=startTime AND d.stamp<endTime
+			WHERE a.unit=unit
+			GROUP BY a.member as member, b.project as bookProject
+			ORDER BY member, bookProject;
+
+	INTO projects SELECT 
+		a.id, a.name, a.caption, a.memo, a.ratioX, a.ratioY, a.readUnit, a.[$create], a.[$update]
+		FROM BookProject as a 
+			JOIN tblUnitProjects as d ON a.id=d.project
+		WHERE a.rootUnit=rootUnit
+		ORDER BY d.orderNo;
+};
+
+QUERY GetMySum (
+	unit ID,
+	at Date,
+	period TINYINT,			// 1=day, 2=week, 3=month, 4=year
+)
+RETURNS projects (
+	id ID,
+	name CHAR(100),
+	caption CHAR(100),
+	memo CHAR(100),
+	ratioX INT DEFAULT 1,		-- ratioX / ratioY 是显示内容值
+	ratioY INT DEFAULT 1,
+	readUnit CHAR(20),			-- 显示单位
+	[$create] TIMESTAMP, 
+	[$update] TIMESTAMP,
+)
+RETURNS sum (
+	project ID,
+	debit DEC(16,4),
+	credit DEC(16,4),
+) {
+	-- 获取startTime 和 endTime
+	VAR theDay TIMESTAMP, startTime TIMESTAMP, endTime TIMESTAMP;
+	IF at IS NULL {
+		SET theDay=date(now());
+	}
+	ELSE {
+		SET theDay=date(at);
+	}
+	IF period=1 {
+		SET startTime=theDay;
+		SET endTime=DATEADD(day, 1, theDay);
+	}
+	ELSEIF period=2 {
+		-- 星期一0点开始的一周
+		SET startTime=DATEADD(day, -WEEKDAY(theDay), theDay);
+		SET endTime=DATEADD(day, 7, startTime);
+	}
+	ELSEIF period=3 {
+		SET startTime=DATEADD(day, -DAY(theDay)+1, theDay);
+		SET endTime=DATEADD(month, 1, startTime);
+	}
+	ELSEIF period=4 {
+		SET startTime=CONCAT(YEAR(theDay), '-1-1');
+		SET endTime=DATEADD(year, 1, startTime);
+	}
+
+	-- 获取rootUnit
+	VAR rootUnit ID;
+	WHILE 1=1 {
+		VAR p ID = unit, parentUnit ID;
+		SET parentUnit=a.note0 FROM Note2Note as a WHERE a.note1=p;
+		IF parentUnit IS NULL { 
+			SET rootUnit = p;
+			break;
+		}
+	}
+
+	-- 获取 unit projects
+	TABLE tblUnitProjects (KEY project ID, orderNo SMALLINT);
+	INTO tblUnitProjects SELECT a.project, a.orderNo FROM BookUnitProject as a WHERE a.unit=unit;
+	IF (SELECT count(*) FROM tblUnitProjects)=0 {
+		INTO tblUnitProjects SELECT a.id as project, a.id as orderNo FROM BookProject as a WHERE a.rootUnit=rootUnit;
+	}
+
+	INTO sum
+		SELECT bookProject as project, ifnull(sum(d.debit),0) as debit, ifnull(sum(d.credit),0) as credit
+			FROM UnitFolder as a
+				JOIN tblUnitProjects as b ON 1=1 -- c.project=b.project
+				LEFT JOIN BookUserProject as c ON c.unit=a.unit AND c.owner=a.member AND c.project=b.project
+				LEFT JOIN BookFlow as d ON d.project=c.id AND d.stamp>=startTime AND d.stamp<endTime
+			WHERE a.unit=unit AND a.member=$user
+			GROUP BY b.project as bookProject
+			ORDER BY bookProject;
+
+	INTO projects SELECT 
+		a.id, a.name, a.caption, a.memo, a.ratioX, a.ratioY, a.readUnit, a.[$create], a.[$update]
+		FROM BookProject as a 
+			JOIN tblUnitProjects as d ON a.id=d.project
+		WHERE a.rootUnit=rootUnit
+		ORDER BY d.orderNo;
+};
+

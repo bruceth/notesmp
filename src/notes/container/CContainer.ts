@@ -21,7 +21,6 @@ export abstract class CContainer extends CNoteBase {
 			this.caption = param.caption;
 			this.cContent.init(param.obj);
 		}
-		//this.relativeKey = 'to';
 
 		let folderId = this.noteItem?.note;
 		if (!folderId) this.folderId = -EnumSpecFolder.notes;

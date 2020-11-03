@@ -1,4 +1,5 @@
-import { Controller } from "../vm";
+import _ from 'lodash';
+import { Controller, WebNav } from "../vm";
 import { IConstructor } from "./CAppBase";
 
 export abstract class CBase extends Controller {
@@ -13,6 +14,9 @@ export abstract class CBase extends Controller {
 
     protected get uqs(): any {return this._uqs}
 	get cApp(): any {return this._cApp}
+	hasRole(role:string|number):boolean {
+		return this._cApp?.hasRole(role);
+	}
 
 	internalT(str:string):any {
 		let r = super.internalT(str);
@@ -30,7 +34,15 @@ export abstract class CBase extends Controller {
 		let s = new type(this);
 		s.init(param);
 		return s;
-    }
+	}
+	
+	getWebNav(): WebNav<any> {
+		let wn = this._cApp?.getWebNav();
+		if (wn === undefined) return;
+		let ret = _.clone(wn);
+		_.merge(ret, this.webNav);
+		return ret;
+	}
 }
 
 export abstract class CSub<T extends CBase> extends CBase {
@@ -48,4 +60,21 @@ export abstract class CSub<T extends CBase> extends CBase {
 	}
 
     protected get owner(): CBase {return this._owner}
+	
+	getWebNav(): WebNav<any> {
+		let wn = this._cApp?.getWebNave();
+		if (wn === undefined) return;
+		let ownerWNs:WebNav<any>[] = [];
+		for (let p = this.owner; p!==undefined; p = (p as any)?.owner) {
+			ownerWNs.push(p.webNav);
+		}
+		let ret = _.clone(wn);
+		for (;;) {
+			let own = ownerWNs.pop();
+			if (own === undefined) break;
+			_.merge(ret, own);
+		}
+		_.merge(ret, this.webNav);
+		return ret;
+	}
 }

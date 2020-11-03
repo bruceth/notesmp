@@ -19,6 +19,7 @@
     "isolatedModules": false,
     "noEmit": true,
     "jsx": "react",
+    "sourceMap": true,
     "strictNullChecks": false,
     "experimentalDecorators": true,
     "baseUrl": "src",

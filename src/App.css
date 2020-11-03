@@ -108,3 +108,13 @@ ul.note-content-list>li {
 .text-primary-dark {
 	color: #3f3fc0;
 }
+
+div.tv-page-webnav>header {
+	background-color: red;
+}
+div.tv-page-webnav>article {
+	background-color: white;
+}
+div.tv-page-webnav>footer {
+	background-color: lightblue;
+}

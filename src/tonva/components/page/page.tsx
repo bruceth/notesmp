@@ -1,15 +1,14 @@
 import * as React from 'react';
 import {observer} from 'mobx-react';
-import {PageHeader} from './pageHeader';
+import {PageHeaderProps, renderPageHeader} from './pageHeader';
 import { TabsProps, TabsView } from './tabs';
-import { ScrollProps, ScrollView } from './scrollView';
+import { ScrollProps, ScrollView, PageWebNav, WebNavScrollView } from './scrollView';
 
 export interface IVPage {
 	content():JSX.Element;
 	header():JSX.Element;
 	footer():JSX.Element;
 }
-
 
 export interface PageProps extends ScrollProps {
     back?: 'close' | 'back' | 'none';
@@ -21,6 +20,7 @@ export interface PageProps extends ScrollProps {
 	className?: string;
 	afterBack?: () => void;
 	tabsProps?: TabsProps;
+	webNav?: PageWebNav;
 }
 
 @observer
@@ -35,7 +35,28 @@ export class Page extends React.Component<PageProps> {
 	}
 
 	private renderHeader() {
-		const {back, header, right, headerClassName, afterBack} = this.props;
+		const {back, header, right, headerClassName, afterBack, logout} = this.props;
+		if (header === false) return;
+		const {webNav} = this.props;
+		let inWebNav = false;
+		let pageHeaderProps:PageHeaderProps = {
+			back,
+			center: header as any,
+			right,
+			logout,
+			className: headerClassName,
+			afterBack,
+		};
+		if (webNav !== undefined) {
+			inWebNav = true;
+			let {renderPageHeader: rph} = webNav;
+			if (rph) return rph(pageHeaderProps);
+		}
+		else {
+			inWebNav = false;
+		}
+		return renderPageHeader(pageHeaderProps, inWebNav);
+		/*
 		let pageHeader = header !== false && <PageHeader 
 			back={back} 
 			center={header as any}
@@ -45,33 +66,50 @@ export class Page extends React.Component<PageProps> {
 			afterBack={afterBack}
 			/>;
 		return pageHeader;
+		*/
 	}
 
 	private renderFooter() {
-		const {footer} = this.props;
-		if (footer) {
-			let elFooter = <footer>{footer}</footer>;
-			return <>
-				<section className="tv-page-footer">{elFooter}</section>
-				{elFooter}
-			</>;
-		}
+		const {footer, webNav} = this.props;
+		if (!footer) return;
+		let elFooter = <footer>{footer}</footer>;
+		if (webNav) return elFooter;
+		return <>
+			<section className="tv-page-footer">{elFooter}</section>
+			{elFooter}
+		</>;
 	}
 
     render() {
 		if (this.tabsView) {
 			return React.createElement(this.tabsView.content);
 		}
-		const {onScroll, onScrollTop, onScrollBottom, children, className} = this.props;
-		return <ScrollView
-			onScroll={onScroll}
-			onScrollTop={onScrollTop}
-			onScrollBottom={onScrollBottom}
-			className={className}
-		>
+		const {onScroll, onScrollTop, onScrollBottom, children, className, webNav} = this.props;
+		let content = <>
 			{this.renderHeader()}
 			<main>{children}</main>
 			{this.renderFooter()}
-		</ScrollView>;
+		</>;
+		if (webNav) {
+			return <WebNavScrollView
+				onScroll={onScroll}
+				onScrollTop={onScrollTop}
+				onScrollBottom={onScrollBottom}
+				className={className}
+				webNav={webNav}
+			>
+				{content}
+			</WebNavScrollView>;
+		}
+		else {
+			return <ScrollView
+				onScroll={onScroll}
+				onScrollTop={onScrollTop}
+				onScrollBottom={onScrollBottom}
+				className={className}
+			>
+				{content}
+			</ScrollView>;
+		}
 	}
 }

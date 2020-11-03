@@ -159,7 +159,7 @@ ACTION SetUnitMemberRole(
 	BOOK UnitFolder AT(unit, member) SET role= (oldRole & ~roleMask) | role;
 };
 
-ACTION ChangeRootUnitProp(
+ACTION ChangeRootUnitProp ver 1.0 (
 	unit ID,
 	prop CHAR(100),
 	value TEXT,
@@ -176,6 +176,7 @@ ACTION ChangeRootUnitProp(
 		}
 		ELSEIF prop='tonvaUnit' {
 			BOOK UnitRoot AT(unit) SET tonvaUnit=value;
+			SETTING Unit Add value;
 		}
 		ELSEIF prop='x' {
 			BOOK UnitRoot AT(unit) SET x=value;
