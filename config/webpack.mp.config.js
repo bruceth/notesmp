@@ -121,13 +121,13 @@ module.exports = {
       },
       {
         test: /\.(png|jpg|gif|env)$/,
-        loader: require.resolve('file-loader'),
+        loader: require.resolve('url-loader'),
         // Exclude `js` files to keep "css" loader working as it injects
         // its runtime that would otherwise be processed through "file" loader.
         // Also exclude `html` and `json` extensions so they get processed
         // by webpacks internal loaders.
         options: {
-          name: '[name].[ext]',
+          name: 'http://node.jjol.cn/[name].[ext]',
         },
       },
       {
